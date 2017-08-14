@@ -13,7 +13,8 @@ class MapRender {
         this.mouseInArea = false;
 
         this.drawArea = true;
-        this.drawAreaMode = "rect";
+        //this.drawAreaMode = "rect";
+        this.drawAreaMode = "polygon";
         this.areaPoint = [];
 
         this.mapAreaList = [];
@@ -45,12 +46,19 @@ class MapRender {
                     this.mapAreaList.push(mapArea);
                     this.areaPoint.length = 0;
                 }
+            } else if (this.drawAreaMode == "polygon") {
+                if (this.areaPoint.length >= 2) {
+                    if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
+                        var mapArea = new MapArea(this.areaPoint);
+                        this.mapAreaList.push(mapArea);
+                        this.areaPoint.length = 0;
+                    }
+                }
             }
             this.draw();
         } else {
             this.areaPoint.length = 0;
             this.draw();
-            e.preventdefault();
         }
 
     }
@@ -108,13 +116,26 @@ class MapRender {
         }
 
         if (this.drawAreaMode == "rect") {
-            console.log("drawPaintArea");
             ctx.beginPath();
             ctx.strokeStyle = "rgb(32, 144, 241)";
             ctx.lineJoin = "round";
             ctx.lineWidth = 2;
             ctx.strokeRect(this.areaPoint[0].x, this.areaPoint[0].y, this.mouse.x - this.areaPoint[0].x, this.mouse.y - this.areaPoint[0].y);
             ctx.closePath();
+        } else if (this.drawAreaMode == "polygon") {
+            console.log("drawPaintArea");
+            ctx.beginPath();
+            ctx.strokeStyle = "rgb(32, 144, 241)";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = 2;
+            this.areaPoint.forEach((point, index) => {
+                if (index == 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            })
+            ctx.stroke();
         }
     }
 
