@@ -1,4 +1,5 @@
 import MapArea from './mapArea';
+import Util from './util';
 
 class MapRender {
     constructor(canvas) {
@@ -14,7 +15,8 @@ class MapRender {
 
         this.drawArea = true;
         //this.drawAreaMode = "rect";
-        this.drawAreaMode = "polygon";
+        //this.drawAreaMode = "polygon";
+        this.drawAreaMode = "circle";
         this.areaPoint = [];
 
         this.mapAreaList = [];
@@ -42,17 +44,24 @@ class MapRender {
             if (this.drawAreaMode == "rect") {
                 // 矩形框绘制的时候 第二个点就可以认为是绘制结束
                 if (this.areaPoint.length == 2) {
-                    var mapArea = new MapArea(this.areaPoint);
+                    var mapArea = new MapArea(this.areaPoint, "polygon");
                     this.mapAreaList.push(mapArea);
                     this.areaPoint.length = 0;
                 }
             } else if (this.drawAreaMode == "polygon") {
                 if (this.areaPoint.length >= 2) {
                     if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
-                        var mapArea = new MapArea(this.areaPoint);
+                        var mapArea = new MapArea(this.areaPoint, "polygon");
                         this.mapAreaList.push(mapArea);
                         this.areaPoint.length = 0;
                     }
+                }
+            } else if (this.drawAreaMode == "circle") {
+                // 圆形绘制的时候 第二个点就可以认为是绘制结束
+                if (this.areaPoint.length == 2) {
+                    var mapArea = new MapArea(this.areaPoint, "circle");
+                    this.mapAreaList.push(mapArea);
+                    this.areaPoint.length = 0;
                 }
             }
             this.draw();
@@ -69,6 +78,7 @@ class MapRender {
         if (nearbyPoint) {
             this.mouse = nearbyPoint;
         }
+
         this.draw();
     }
     onMouseLeave(e) {
@@ -77,13 +87,9 @@ class MapRender {
         this.draw();
     }
     findNearbyPoint(point) {
-        var getDistance = function (p1, p2) {
-            return Math.pow((Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2)), 0.5);
-        }
-
         // 绘制中的起点需要有吸附功能
         if (this.areaPoint.length > 0) {
-            var distance = getDistance(point, this.areaPoint[0]);
+            var distance = Util.getDistance(point, this.areaPoint[0]);
             if (distance <= 10) {
                 return this.areaPoint[0];
             }
@@ -93,7 +99,7 @@ class MapRender {
         for (var i = 0; i < this.mapAreaList.length; i++) {
             var mapArea = this.mapAreaList[i];
             for (var j = 0; j < mapArea.points.length; j++) {
-                var distance = getDistance(mapArea.points[j], point);
+                var distance = Util.getDistance(mapArea.points[j], point);
                 if (distance <= 10) {
                     return mapArea.points[j];
                 }
@@ -120,7 +126,7 @@ class MapRender {
         ctx.fillStyle = "white";
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(32, 144, 241,0.8)";
-        ctx.rect(20, 20, this.map.width - 40, this.map.height - 40);
+        ctx.rect(0, 0, this.map.width, this.map.height);
         this.mouseInArea = ctx.isPointInPath(this.mouse.x, this.mouse.y);
         ctx.closePath();
         ctx.fill();
@@ -164,6 +170,15 @@ class MapRender {
             })
             ctx.lineTo(this.mouse.x, this.mouse.y);
             ctx.stroke();
+        } else if (this.drawAreaMode == "circle") {
+            var r = Util.getDistance(this.areaPoint[0],this.mouse);
+            ctx.beginPath();
+            ctx.strokeStyle = "rgb(32, 144, 241)";
+            ctx.lineWidth = 2;
+            ctx.arc(this.areaPoint[0].x, this.areaPoint[0].y, r, 0, 2 * Math.PI);
+            ctx.stroke();
+            //ctx.strokeRect(this.areaPoint[0].x, this.areaPoint[0].y, this.mouse.x - this.areaPoint[0].x, this.mouse.y - this.areaPoint[0].y);
+            //ctx.closePath();
         }
     }
 
