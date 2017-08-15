@@ -37,7 +37,7 @@ class MapRender {
         console.log("onmousedown", e);
         var leftClick = e.button == 0;
         if (leftClick) {
-            var point = { x: e.offsetX, y: e.offsetY };
+            var point = this.mouse;
             this.areaPoint.push(point);
             if (this.drawAreaMode == "rect") {
                 // 矩形框绘制的时候 第二个点就可以认为是绘制结束
@@ -65,12 +65,40 @@ class MapRender {
     onMouseMove(e) {
         //console.log("onmousemove", e.offsetX, e.offsetY);
         this.mouse = { x: e.offsetX, y: e.offsetY };
+        var nearbyPoint = this.findNearbyPoint(this.mouse);
+        if (nearbyPoint) {
+            this.mouse = nearbyPoint;
+        }
         this.draw();
     }
     onMouseLeave(e) {
         var ctx = this.ctx;
         this.mouse = { x: -1, y: -1 };
         this.draw();
+    }
+    findNearbyPoint(point) {
+        var getDistance = function (p1, p2) {
+            return Math.pow((Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2)), 0.5);
+        }
+
+        // 绘制中的起点需要有吸附功能
+        if (this.areaPoint.length > 0) {
+            var distance = getDistance(point, this.areaPoint[0]);
+            if (distance <= 10) {
+                return this.areaPoint[0];
+            }
+        }
+
+        // 已绘制完的区域的顶点需要有吸附功能
+        for (var i = 0; i < this.mapAreaList.length; i++) {
+            var mapArea = this.mapAreaList[i];
+            for (var j = 0; j < mapArea.points.length; j++) {
+                var distance = getDistance(mapArea.points[j], point);
+                if (distance <= 10) {
+                    return mapArea.points[j];
+                }
+            }
+        }
     }
     draw() {
         var ctx = this.ctx;
@@ -90,14 +118,13 @@ class MapRender {
     drawMapBoundary(ctx) {
         ctx.beginPath();
         ctx.fillStyle = "white";
-        ctx.strokeStyle = "rgba(32, 144, 241,0.5)";
-        ctx.rect(100, 50, this.map.width - 200, this.map.height - 100);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(32, 144, 241,0.8)";
+        ctx.rect(20, 20, this.map.width - 40, this.map.height - 40);
         this.mouseInArea = ctx.isPointInPath(this.mouse.x, this.mouse.y);
-        ctx.fillRect(100, 50, this.map.width - 200, this.map.height - 100);
-        ctx.strokeRect(100, 50, this.map.width - 200, this.map.height - 100);
-
         ctx.closePath();
         ctx.fill();
+        ctx.stroke();
     }
 
 
@@ -135,6 +162,7 @@ class MapRender {
                     ctx.lineTo(point.x, point.y);
                 }
             })
+            ctx.lineTo(this.mouse.x, this.mouse.y);
             ctx.stroke();
         }
     }
