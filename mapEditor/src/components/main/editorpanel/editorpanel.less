@@ -29,3 +29,60 @@
         }
     }
 }
+
+.itemcontent {
+    display: flex;
+    align-items: center;
+    p {
+        width: 35%;
+        padding-right: 15px;
+        text-align: right;
+    }
+    .painttype {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        .typerect {
+            height: 32px;
+            width: 32px;
+            background: url("../../assets/绘制矩形.png") no-repeat center;
+            background-size: 70%;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .typerect_sel {
+            background: url("../../assets/绘制矩形_sel.png") no-repeat center;
+            border: 1px solid #2090F1;
+        }
+        .typecircle {
+            height: 32px;
+            width: 32px;
+            background: url("../../assets/绘制圆形.png") no-repeat center;
+            background-size: 70%;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .typecircle_sel {
+            background: url("../../assets/绘制圆形_sel.png") no-repeat center;
+            border: 1px solid #2090F1;
+        }
+        .typepolygon {
+            height: 32px;
+            width: 32px;
+            background: url("../../assets/绘制多边形.png") no-repeat center;
+            background-size: 70%;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .typepolygon_sel {
+            background: url("../../assets/绘制多边形_sel.png") no-repeat center;
+            border: 1px solid #2090F1;
+        }
+    }
+}
