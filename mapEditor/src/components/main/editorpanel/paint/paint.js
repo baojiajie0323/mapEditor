@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import styles from '../editorpanel.less'
-import { Collapse } from 'antd';
+import { Collapse, Tooltip } from 'antd';
 const Panel = Collapse.Panel;
 
 import SettingIcon from 'material-ui/svg-icons/action/touch-app';
@@ -33,7 +33,7 @@ class Paint extends React.Component {
         const { drawMode } = this.props;
         return (
             <div className={styles.paint}>
-                <Collapse accordion bordered={false} defaultActiveKey={['1']}>
+                <Collapse bordered={false} defaultActiveKey={['1']}>
                     <Panel header={<div className={[styles.title, styles.pointer].join(' ')}>选择元素</div>} key="1">
                         <p>{text}</p>
                     </Panel>
@@ -44,15 +44,21 @@ class Paint extends React.Component {
                         <div className={styles.itemcontent}>
                             <p>形状</p>
                             <div className={styles.painttype}>
-                                <div onClick={this.onClickDrawRect}
-                                    className={[styles.typerect, drawMode == "rect" ? styles.typerect_sel : ''].join(' ')}>
-                                </div>
-                                <div onClick={this.onClickDrawCircle}
-                                    className={[styles.typecircle, drawMode == "circle" ? styles.typecircle_sel : ''].join(' ')}>
-                                </div>
-                                <div onClick={this.onClickDrawPolygon}
-                                    className={[styles.typepolygon, drawMode == "polygon" ? styles.typepolygon_sel : ''].join(' ')}>
-                                </div>
+                                <Tooltip placement="bottom" title="绘制矩形">
+                                    <div onClick={this.onClickDrawRect}
+                                        className={[styles.typerect, drawMode == "rect" ? styles.typerect_sel : ''].join(' ')}>
+                                    </div>
+                                </Tooltip>
+                                <Tooltip placement="bottom" title="绘制圆形">
+                                    <div onClick={this.onClickDrawCircle}
+                                        className={[styles.typecircle, drawMode == "circle" ? styles.typecircle_sel : ''].join(' ')}>
+                                    </div>
+                                </Tooltip>
+                                <Tooltip placement="bottom" title="绘制多边形">
+                                    <div onClick={this.onClickDrawPolygon}
+                                        className={[styles.typepolygon, drawMode == "polygon" ? styles.typepolygon_sel : ''].join(' ')}>
+                                    </div>
+                                </Tooltip>
                             </div>
                         </div>
                     </Panel>
@@ -63,7 +69,7 @@ class Paint extends React.Component {
 }
 
 function MapToStates(states) {
-    console.log("MapToStates",states)
+    console.log("MapToStates", states)
     const { drawMode } = states.mapeditor;
     return {
         drawMode

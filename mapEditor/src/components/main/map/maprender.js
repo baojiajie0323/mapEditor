@@ -8,68 +8,85 @@ class MapRender {
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseLeave = this.onMouseLeave.bind(this);
         this.onMouseDown = this.onMouseDown.bind(this);
+        this.contextmenucb = null;
 
         this.showMousePoint = true;
         this.mouse = [];
         this.mouseInArea = false;
 
-        this.drawArea = true;
-        //this.drawAreaMode = "rect";
-        //this.drawAreaMode = "polygon";
-        this.drawAreaMode = "circle";
+        this.drawAreaMode = "";
         this.areaPoint = [];
 
         this.mapAreaList = [];
         this.init();
     }
     init() {
-        this.map.oncontextmenu = function (e) {
-            return false;
-        }
         this.initHandle();
         this.draw();
     }
-
     initHandle() {
         this.map.addEventListener("mousedown", this.onMouseDown, false);
         this.map.addEventListener("mousemove", this.onMouseMove, false);
         this.map.addEventListener("mouseleave", this.onMouseLeave, false);
     }
+    setDrawMode(drawMode) {
+        this.drawAreaMode = drawMode;
+        this.areaPoint = [];
+        for (var i = 0; i < this.mapAreaList.length; i++) {
+            var mapArea = this.mapAreaList[i];
+            mapArea.checkSelect(!drawMode);
+        }
+        this.draw();
+    }
     onMouseDown(e) {
         console.log("onmousedown", e);
         var leftClick = e.button == 0;
-        if (leftClick) {
-            var point = this.mouse;
-            this.areaPoint.push(point);
-            if (this.drawAreaMode == "rect") {
-                // 矩形框绘制的时候 第二个点就可以认为是绘制结束
-                if (this.areaPoint.length == 2) {
-                    var mapArea = new MapArea(this.areaPoint, "polygon");
-                    this.mapAreaList.push(mapArea);
-                    this.areaPoint.length = 0;
-                }
-            } else if (this.drawAreaMode == "polygon") {
-                if (this.areaPoint.length >= 2) {
-                    if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
+        if (this.drawAreaMode) {
+            //绘制模式
+            if (leftClick) {
+                var point = this.mouse;
+                this.areaPoint.push(point);
+                if (this.drawAreaMode == "rect") {
+                    // 矩形框绘制的时候 第二个点就可以认为是绘制结束
+                    if (this.areaPoint.length == 2) {
                         var mapArea = new MapArea(this.areaPoint, "polygon");
                         this.mapAreaList.push(mapArea);
                         this.areaPoint.length = 0;
                     }
+                } else if (this.drawAreaMode == "polygon") {
+                    if (this.areaPoint.length >= 2) {
+                        if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
+                            var mapArea = new MapArea(this.areaPoint, "polygon");
+                            this.mapAreaList.push(mapArea);
+                            this.areaPoint.length = 0;
+                        }
+                    }
+                } else if (this.drawAreaMode == "circle") {
+                    // 圆形绘制的时候 第二个点就可以认为是绘制结束
+                    if (this.areaPoint.length == 2) {
+                        var mapArea = new MapArea(this.areaPoint, "circle");
+                        this.mapAreaList.push(mapArea);
+                        this.areaPoint.length = 0;
+                    }
                 }
-            } else if (this.drawAreaMode == "circle") {
-                // 圆形绘制的时候 第二个点就可以认为是绘制结束
-                if (this.areaPoint.length == 2) {
-                    var mapArea = new MapArea(this.areaPoint, "circle");
-                    this.mapAreaList.push(mapArea);
-                    this.areaPoint.length = 0;
-                }
+                this.draw();
+            }
+        } else {
+            for (var i = 0; i < this.mapAreaList.length; i++) {
+                var mapArea = this.mapAreaList[i];
+                mapArea.checkMouse(this.mouse);
             }
             this.draw();
-        } else {
-            this.areaPoint.length = 0;
-            this.draw();
+            if (!leftClick) {
+                for (var i = 0; i < this.mapAreaList.length; i++) {
+                    var mapArea = this.mapAreaList[i];
+                    if (mapArea.mouseInArea) {
+                        this.contextmenucb(true, this.mouse);
+                        break;
+                    }
+                }
+            }
         }
-
     }
     onMouseMove(e) {
         //console.log("onmousemove", e.offsetX, e.offsetY);
@@ -78,14 +95,16 @@ class MapRender {
         if (nearbyPoint) {
             this.mouse = nearbyPoint;
         }
-
-        this.draw();
+        if (this.drawAreaMode) {
+            this.draw();
+        }
     }
     onMouseLeave(e) {
         var ctx = this.ctx;
         this.mouse = { x: -1, y: -1 };
         this.draw();
     }
+
     findNearbyPoint(point) {
         // 绘制中的起点需要有吸附功能
         if (this.areaPoint.length > 0) {
@@ -112,16 +131,11 @@ class MapRender {
         this.drawMapBoundary(ctx);
         this.drawMapArea(ctx);
         this.drawPaintArea(ctx);
-        ctx.beginPath();
-        if (this.mouseInArea && this.mouse.x > 0 && this.mouse.y > 0) {
-            ctx.arc(this.mouse.x, this.mouse.y, 4, 0, Math.PI * 2, true);
-            ctx.fillStyle = "rgb(32, 144, 241)";
-        }
-        ctx.closePath();
-        ctx.fill();
+        this.drawCurPoint(ctx);
     }
 
     drawMapBoundary(ctx) {
+        console.log("drawMapBoundary", this.map.width, this.map.height);
         ctx.beginPath();
         ctx.fillStyle = "white";
         ctx.lineWidth = 1;
@@ -135,13 +149,14 @@ class MapRender {
 
 
     drawMapArea(ctx) {
+        var context = this;
         this.mapAreaList.forEach((mapArea) => {
             mapArea.draw(ctx);
         })
     }
 
     drawPaintArea(ctx) {
-        if (!this.drawArea) {
+        if (!this.drawAreaMode) {
             return;
         }
         if (this.areaPoint.length <= 0) {
@@ -171,7 +186,7 @@ class MapRender {
             ctx.lineTo(this.mouse.x, this.mouse.y);
             ctx.stroke();
         } else if (this.drawAreaMode == "circle") {
-            var r = Util.getDistance(this.areaPoint[0],this.mouse);
+            var r = Util.getDistance(this.areaPoint[0], this.mouse);
             ctx.beginPath();
             ctx.strokeStyle = "rgb(32, 144, 241)";
             ctx.lineWidth = 2;
@@ -181,7 +196,18 @@ class MapRender {
             //ctx.closePath();
         }
     }
-
+    drawCurPoint(ctx) {
+        if (!this.drawAreaMode) {
+            return;
+        }
+        ctx.beginPath();
+        if (this.mouseInArea && this.mouse.x > 0 && this.mouse.y > 0) {
+            ctx.arc(this.mouse.x, this.mouse.y, 4, 0, Math.PI * 2, true);
+            ctx.fillStyle = "rgb(32, 144, 241)";
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
 
 }
 

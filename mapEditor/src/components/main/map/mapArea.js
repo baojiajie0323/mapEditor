@@ -2,6 +2,9 @@ import Util from './util';
 
 class MapArea {
     constructor(points, type) {
+        this.checkselected = false;
+        this.mouseInArea = false;
+        this.mouse = { x: 0, y: 0 };
         this.type = type;
         console.log("MapArea", points);
         if (type == "circle") {
@@ -21,12 +24,16 @@ class MapArea {
             }
         }
     }
+    checkSelect(checkselect) {
+        this.checkselected = checkselect;
+    }
+    checkMouse(mouse) {
+        this.mouse = mouse;
+    }
     draw(ctx) {
         console.log("mapArea draw", this.points, this.type);
 
         ctx.beginPath();
-        ctx.strokeStyle = "rgba(32, 144, 241,0.5)";
-        ctx.fillStyle = "rgba(32, 144, 241,0.3)";
         ctx.lineJoin = "round";
         ctx.lineWidth = 1;
         if (this.type == "polygon") {
@@ -41,8 +48,20 @@ class MapArea {
         } else {
             ctx.arc(this.points[0].x, this.points[0].y, this.r, 0, 2 * Math.PI);
         }
+        ctx.fillStyle = "rgba(32, 144, 241,0.3)";
         ctx.fill();
+        ctx.strokeStyle = "rgba(32, 144, 241,0.5)";
+        if (this.checkselected) {
+            if (ctx.isPointInPath(this.mouse.x, this.mouse.y)) {
+                this.mouseInArea = true;
+                ctx.strokeStyle = "rgb(255, 110, 11)";
+                ctx.lineWidth = 2;
+            } else {
+                this.mouseInArea = false;
+            }
+        }
         ctx.stroke();
+
     }
 }
 
