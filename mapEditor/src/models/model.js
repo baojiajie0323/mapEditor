@@ -4,7 +4,7 @@ export default {
   namespace: 'mapeditor',
 
   state: {
-    
+    drawMode: ""
   },
 
   subscriptions: {
@@ -21,6 +21,9 @@ export default {
   reducers: {
     save(state, action) {
       return { ...state, ...action.payload };
+    },
+    setDrawMode(state, { payload: drawMode }) {
+      return { ...state, drawMode };
     },
   },
 

@@ -11,12 +11,26 @@ import EditIcon from 'material-ui/svg-icons/image/edit';
 class Paint extends React.Component {
     constructor(props) {
         super(props);
+        this.onClickDrawRect = this.onClickDrawRect.bind(this);
+        this.onClickDrawCircle = this.onClickDrawCircle.bind(this);
+        this.onClickDrawPolygon = this.onClickDrawPolygon.bind(this);
     }
     componentDidMount() {
 
     }
+    onClickDrawRect() {
+        console.log("onClickDrawRect");
+        this.props.dispatch({ type: 'mapeditor/setDrawMode', payload: "rect" })
+    }
+    onClickDrawCircle() {
+        this.props.dispatch({ type: 'mapeditor/setDrawMode', payload: "circle" })
+    }
+    onClickDrawPolygon() {
+        this.props.dispatch({ type: 'mapeditor/setDrawMode', payload: "polygon" })
+    }
     render() {
         const text = `请在界面上选择元素`;
+        const { drawMode } = this.props;
         return (
             <div className={styles.paint}>
                 <Collapse accordion bordered={false} defaultActiveKey={['1']}>
@@ -30,9 +44,15 @@ class Paint extends React.Component {
                         <div className={styles.itemcontent}>
                             <p>形状</p>
                             <div className={styles.painttype}>
-                                <div className={styles.typerect}></div>
-                                <div className={styles.typecircle}></div>
-                                <div className={styles.typepolygon}></div>
+                                <div onClick={this.onClickDrawRect}
+                                    className={[styles.typerect, drawMode == "rect" ? styles.typerect_sel : ''].join(' ')}>
+                                </div>
+                                <div onClick={this.onClickDrawCircle}
+                                    className={[styles.typecircle, drawMode == "circle" ? styles.typecircle_sel : ''].join(' ')}>
+                                </div>
+                                <div onClick={this.onClickDrawPolygon}
+                                    className={[styles.typepolygon, drawMode == "polygon" ? styles.typepolygon_sel : ''].join(' ')}>
+                                </div>
                             </div>
                         </div>
                     </Panel>
@@ -43,8 +63,10 @@ class Paint extends React.Component {
 }
 
 function MapToStates(states) {
+    console.log("MapToStates",states)
+    const { drawMode } = states.mapeditor;
     return {
-
+        drawMode
     }
 }
 export default connect(MapToStates)(Paint)
