@@ -72,16 +72,19 @@ class MapRender {
                 this.draw();
             }
         } else {
-            for (var i = 0; i < this.mapAreaList.length; i++) {
-                var mapArea = this.mapAreaList[i];
-                mapArea.checkMouse(this.mouse);
-            }
-            this.draw();
+            this.checkMouseInArea()
             if (!leftClick) {
                 for (var i = 0; i < this.mapAreaList.length; i++) {
                     var mapArea = this.mapAreaList[i];
                     if (mapArea.mouseInArea) {
-                        this.contextmenucb(true, this.mouse);
+                        var menu = [
+                            { title: '编辑元素', onClick: this.onClickEdit.bind(this) },
+                            { title: '拆分元素', onClick: this.onClickEdit },
+                            { title: '' },
+                            { title: '查看属性数据', onClick: this.onClickEdit },
+                            { title: '删除元素', onClick: this.onClickEdit },
+                        ]
+                        this.contextmenucb(true, menu, this.mouse);
                         break;
                     }
                 }
@@ -102,6 +105,30 @@ class MapRender {
     onMouseLeave(e) {
         var ctx = this.ctx;
         this.mouse = { x: -1, y: -1 };
+        this.draw();
+    }
+
+    checkMouseInArea() {
+        this.curmouseInArea = null;
+        for (var i = 0; i < this.mapAreaList.length; i++) {
+            var mapArea = this.mapAreaList[i];
+            mapArea.checkMouse(this.mouse);
+        }
+        this.draw();
+        for (var i = 0; i < this.mapAreaList.length; i++) {
+            var mapArea = this.mapAreaList[i];
+            if(mapArea.mouseInArea){
+                this.curmouseInArea = mapArea;
+            }
+        }
+        console.log(this.curmouseInArea);
+    }
+
+    onClickEdit() {
+        console.log("onClickEdit");
+        if(this.curmouseInArea){
+            this.curmouseInArea.setEditMode();
+        }
         this.draw();
     }
 

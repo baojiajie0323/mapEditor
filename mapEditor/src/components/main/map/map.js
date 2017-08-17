@@ -19,6 +19,7 @@ class Map extends React.Component {
         this.mapRender = null;
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onContextMenu = this.onContextMenu.bind(this);
+        this.onItemTouchTap = this.onItemTouchTap.bind(this);
     }
     componentDidMount() {
         var mapWidth = this.mapContainer.offsetWidth;
@@ -52,15 +53,26 @@ class Map extends React.Component {
             showMenu: false,
         })
     }
-    onContextMenu(bShow, mouse) {
-        console.log("onContextMenu", bShow, mouse);
+    onContextMenu(bShow, menu, mouse) {
+        console.log("onContextMenu", bShow, menu, mouse);
         this.setState({
             showMenu: bShow,
+            menu: menu,
             menuMouse: mouse,
         })
     }
+    onItemTouchTap(e, menuItem, number) {
+        //if (menuItem.props.value == "编辑元素") {
+        //  alert(11);
+        menuItem.props.value();
+        //}
+
+        this.setState({
+            showMenu: false
+        })
+    }
     render() {
-        const { showMenu, menuMouse } = this.state;
+        const { showMenu, menuMouse, menu } = this.state;
         var contextmenuStyle = {
             position: 'absolute',
             wdith: '120px',
@@ -71,14 +83,14 @@ class Map extends React.Component {
         return <div ref={(c) => { this.mapContainer = c }} className={styles.map}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapcanvas"></canvas>
             {showMenu ? <Paper style={contextmenuStyle}>
-                <Menu desktop={true}>
-                    <MenuItem primaryText="编辑元素" />
-                    <MenuItem primaryText="拉伸元素" />
-                    <MenuItem primaryText="旋转元素" />
-                    <MenuItem primaryText="拆分面" />
-                    <Divider />
-                    <MenuItem primaryText="查看属性数据" />
-                    <MenuItem primaryText="删除元素" />
+                <Menu onItemTouchTap={this.onItemTouchTap} >
+                    {menu.map((m) => {
+                        if (m.title) {
+                            return <MenuItem value={m.onClick} primaryText={m.title} />
+                        } else {
+                            return <Divider />
+                        }
+                    })}
                 </Menu>
             </Paper> : null}
 
