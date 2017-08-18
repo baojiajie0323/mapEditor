@@ -1,11 +1,15 @@
 import Util from './util';
 
 class MapArea {
-    constructor(points, type) {
+    constructor(map, points, type) {
         this.checkselected = false;
         this.mouseInArea = false;
+        this.map = map;
         this.mouse = { x: 0, y: 0 };
         this.type = type;
+        this.editMode = false;
+        this.enableEdit = false;
+        this.editType = "";
         console.log("MapArea", points);
         if (type == "circle") {
             this.points = [];
@@ -30,13 +34,16 @@ class MapArea {
     checkMouse(mouse) {
         this.mouse = mouse;
     }
+    checkEdit(mouse) {
+        this.enableEdit = true;
+    }
     setEditMode(bEdit) {
         this.editMode = true;
     }
-    draw(ctx) {
+    draw(ctx, mouse) {
         console.log("mapArea draw", this.points, this.type);
         if (this.editMode) {
-            this.drawEditFrame(ctx);
+            this.drawEditFrame(ctx, mouse);
         }
 
 
@@ -69,7 +76,7 @@ class MapArea {
         }
         ctx.stroke();
     }
-    drawEditFrame(ctx) {
+    drawEditFrame(ctx, mouse) {
         if (this.type == "polygon") {
             var arr_x = this.points.map((p) => { return p.x });
             var arr_y = this.points.map((p) => { return p.y });
@@ -85,15 +92,70 @@ class MapArea {
             var y2 = cc.y + this.r + 2;
         }
 
-        console.log("drawEditFrame", x1, y1, x2 - x1, y2 - y1);
+        console.log("drawEditFrame", x1, y1, x2 - x1, y2 - y1, "mouse:", mouse.x, mouse.y);
 
         ctx.beginPath();
-        ctx.setLineDash([5,2]);
+        ctx.setLineDash([5, 2]);
         ctx.lineWidth = 2;
         ctx.strokeStyle = "rgb(255, 110, 11)";
         ctx.rect(x1, y1, x2 - x1, y2 - y1);
+        ctx.moveTo(x1 + (x2 - x1) / 2, y1);
+        ctx.lineTo(x1 + (x2 - x1) / 2, y1 - 20);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        var cursor = "default";
+        ctx.beginPath();
+        ctx.arc(x1 + (x2 - x1) / 2, y1 - 22, 3, 0, Math.PI * 2);
+        if (ctx.isPointInPath(mouse.x, mouse.y)) {
+            cursor = "pointer";
+            this.editType = "rotate";
+        }
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.rect(x1 - 3, y1 - 3, 6, 6);
+        if (ctx.isPointInPath(mouse.x, mouse.y)) {
+            cursor = "se-resize";
+            this.editType = "zoom";
+        }
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.rect(x1 - 3, y2 - 3, 6, 6);
+        if (ctx.isPointInPath(mouse.x, mouse.y)) {
+            cursor = "sw-resize";
+            this.editType = "zoom";
+        }
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.rect(x2 - 3, y1 - 3, 6, 6);
+        if (ctx.isPointInPath(mouse.x, mouse.y)) {
+            cursor = "sw-resize";
+            this.editType = "zoom";
+        }
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.rect(x2 - 3, y2 - 3, 6, 6);
+        if (ctx.isPointInPath(mouse.x, mouse.y)) {
+            cursor = "se-resize";
+            this.editType = "zoom";
+        }
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fill();
+        ctx.stroke();
+
+        this.map.style.cursor = cursor;
     }
 }
 

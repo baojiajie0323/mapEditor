@@ -49,14 +49,14 @@ class MapRender {
                 if (this.drawAreaMode == "rect") {
                     // 矩形框绘制的时候 第二个点就可以认为是绘制结束
                     if (this.areaPoint.length == 2) {
-                        var mapArea = new MapArea(this.areaPoint, "polygon");
+                        var mapArea = new MapArea(this.map, this.areaPoint, "polygon");
                         this.mapAreaList.push(mapArea);
                         this.areaPoint.length = 0;
                     }
                 } else if (this.drawAreaMode == "polygon") {
                     if (this.areaPoint.length >= 2) {
                         if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
-                            var mapArea = new MapArea(this.areaPoint, "polygon");
+                            var mapArea = new MapArea(this.map, this.areaPoint, "polygon");
                             this.mapAreaList.push(mapArea);
                             this.areaPoint.length = 0;
                         }
@@ -64,7 +64,7 @@ class MapRender {
                 } else if (this.drawAreaMode == "circle") {
                     // 圆形绘制的时候 第二个点就可以认为是绘制结束
                     if (this.areaPoint.length == 2) {
-                        var mapArea = new MapArea(this.areaPoint, "circle");
+                        var mapArea = new MapArea(this.map, this.areaPoint, "circle");
                         this.mapAreaList.push(mapArea);
                         this.areaPoint.length = 0;
                     }
@@ -92,14 +92,27 @@ class MapRender {
         }
     }
     onMouseMove(e) {
-        //console.log("onmousemove", e.offsetX, e.offsetY);
+        console.log("onmousemove", e);
         this.mouse = { x: e.offsetX, y: e.offsetY };
+
         var nearbyPoint = this.findNearbyPoint(this.mouse);
         if (nearbyPoint) {
             this.mouse = nearbyPoint;
         }
         if (this.drawAreaMode) {
             this.draw();
+        } else {
+            // if (e.which == 1) {
+            //     if (this.curmouseInArea && this.curmouseInArea.editMode &&
+            //         this.curmouseInArea.editType){
+                        
+            //         }
+            // }
+            // else {
+                if (this.curmouseInArea && this.curmouseInArea.editMode) {
+                    this.draw();
+                }
+            //}
         }
     }
     onMouseLeave(e) {
@@ -113,11 +126,12 @@ class MapRender {
         for (var i = 0; i < this.mapAreaList.length; i++) {
             var mapArea = this.mapAreaList[i];
             mapArea.checkMouse(this.mouse);
+            mapArea.checkEdit(true);
         }
         this.draw();
         for (var i = 0; i < this.mapAreaList.length; i++) {
             var mapArea = this.mapAreaList[i];
-            if(mapArea.mouseInArea){
+            if (mapArea.mouseInArea) {
                 this.curmouseInArea = mapArea;
             }
         }
@@ -126,7 +140,7 @@ class MapRender {
 
     onClickEdit() {
         console.log("onClickEdit");
-        if(this.curmouseInArea){
+        if (this.curmouseInArea) {
             this.curmouseInArea.setEditMode();
         }
         this.draw();
@@ -178,7 +192,7 @@ class MapRender {
     drawMapArea(ctx) {
         var context = this;
         this.mapAreaList.forEach((mapArea) => {
-            mapArea.draw(ctx);
+            mapArea.draw(ctx, this.mouse);
         })
     }
 
