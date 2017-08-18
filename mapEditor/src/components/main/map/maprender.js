@@ -1,23 +1,21 @@
 import MapArea from './mapArea';
+import MapHandle from './mapHandle';
 import Util from './util';
 
 class MapRender {
     constructor(canvas) {
-        this.map = canvas;
-        this.ctx = this.map.getContext('2d');
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseLeave = this.onMouseLeave.bind(this);
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.contextmenucb = null;
+        this._map = canvas;
+        this._mapHandle = null;
 
+        this.contextmenucb = null;
         this.showMousePoint = true;
-        this.mouse = [];
         this.mouseInArea = false;
 
         this.drawAreaMode = "";
         this.areaPoint = [];
 
         this.mapAreaList = [];
+
         this.init();
     }
     init() {
@@ -25,47 +23,47 @@ class MapRender {
         this.draw();
     }
     initHandle() {
-        this.map.addEventListener("mousedown", this.onMouseDown, false);
-        this.map.addEventListener("mousemove", this.onMouseMove, false);
-        this.map.addEventListener("mouseleave", this.onMouseLeave, false);
+        this._mapHandle = new MapHandle(this);
+        this._mapHandle.addListener("mousemove", this.onMouseMove.bind(this));
+        this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
+        this._mapHandle.addListener("mouseleave", this.onMouseLeave.bind(this));
+    }
+    addMapArea(type,points) {
+        var mapArea = new MapArea(this, type, points);
+        this.mapAreaList.push(mapArea);  
+    }
+    isAreaPainting(){
+        return !!this.drawAreaMode;
     }
     setDrawMode(drawMode) {
         this.drawAreaMode = drawMode;
         this.areaPoint = [];
-        for (var i = 0; i < this.mapAreaList.length; i++) {
-            var mapArea = this.mapAreaList[i];
-            mapArea.checkSelect(!drawMode);
-        }
         this.draw();
     }
     onMouseDown(e) {
-        console.log("onmousedown", e);
         var leftClick = e.button == 0;
         if (this.drawAreaMode) {
             //绘制模式
             if (leftClick) {
-                var point = this.mouse;
+                var point = this._mapHandle.mouse;
                 this.areaPoint.push(point);
                 if (this.drawAreaMode == "rect") {
                     // 矩形框绘制的时候 第二个点就可以认为是绘制结束
                     if (this.areaPoint.length == 2) {
-                        var mapArea = new MapArea(this.map, this.areaPoint, "polygon");
-                        this.mapAreaList.push(mapArea);
+                        this.addMapArea("polygon",this.areaPoint);
                         this.areaPoint.length = 0;
                     }
                 } else if (this.drawAreaMode == "polygon") {
                     if (this.areaPoint.length >= 2) {
                         if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
-                            var mapArea = new MapArea(this.map, this.areaPoint, "polygon");
-                            this.mapAreaList.push(mapArea);
+                            this.addMapArea("polygon",this.areaPoint);
                             this.areaPoint.length = 0;
                         }
                     }
                 } else if (this.drawAreaMode == "circle") {
                     // 圆形绘制的时候 第二个点就可以认为是绘制结束
                     if (this.areaPoint.length == 2) {
-                        var mapArea = new MapArea(this.map, this.areaPoint, "circle");
-                        this.mapAreaList.push(mapArea);
+                        this.addMapArea("circle",this.areaPoint);
                         this.areaPoint.length = 0;
                     }
                 }
@@ -84,7 +82,7 @@ class MapRender {
                             { title: '查看属性数据', onClick: this.onClickEdit },
                             { title: '删除元素', onClick: this.onClickEdit },
                         ]
-                        this.contextmenucb(true, menu, this.mouse);
+                        this.contextmenucb(true, menu, this._mapHandle.mouse);
                         break;
                     }
                 }
@@ -92,32 +90,23 @@ class MapRender {
         }
     }
     onMouseMove(e) {
-        console.log("onmousemove", e);
-        this.mouse = { x: e.offsetX, y: e.offsetY };
-
-        var nearbyPoint = this.findNearbyPoint(this.mouse);
-        if (nearbyPoint) {
-            this.mouse = nearbyPoint;
-        }
         if (this.drawAreaMode) {
             this.draw();
         } else {
             // if (e.which == 1) {
             //     if (this.curmouseInArea && this.curmouseInArea.editMode &&
             //         this.curmouseInArea.editType){
-                        
+
             //         }
             // }
             // else {
-                if (this.curmouseInArea && this.curmouseInArea.editMode) {
-                    this.draw();
-                }
+            if (this.curmouseInArea && this.curmouseInArea.editMode) {
+                this.draw();
+            }
             //}
         }
     }
     onMouseLeave(e) {
-        var ctx = this.ctx;
-        this.mouse = { x: -1, y: -1 };
         this.draw();
     }
 
@@ -125,7 +114,7 @@ class MapRender {
         this.curmouseInArea = null;
         for (var i = 0; i < this.mapAreaList.length; i++) {
             var mapArea = this.mapAreaList[i];
-            mapArea.checkMouse(this.mouse);
+            mapArea.checkMouse(this._mapHandle.mouse);
             mapArea.checkEdit(true);
         }
         this.draw();
@@ -167,32 +156,35 @@ class MapRender {
         }
     }
     draw() {
-        var ctx = this.ctx;
-        ctx.clearRect(0, 0, this.map.width, this.map.height);
-        this.drawMapBoundary(ctx);
+        console.log("draw");
+        var ctx = this._map.getContext('2d');
+        ctx.clearRect(0, 0, this._map.width, this._map.height);
+        var mouseInArea = this.drawMapBoundary(ctx);
         this.drawMapArea(ctx);
         this.drawPaintArea(ctx);
-        this.drawCurPoint(ctx);
+        if(mouseInArea){
+            this.drawCurPoint(ctx);
+        }        
     }
 
     drawMapBoundary(ctx) {
-        console.log("drawMapBoundary", this.map.width, this.map.height);
         ctx.beginPath();
         ctx.fillStyle = "white";
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(32, 144, 241,0.8)";
-        ctx.rect(0, 0, this.map.width, this.map.height);
-        this.mouseInArea = ctx.isPointInPath(this.mouse.x, this.mouse.y);
+        ctx.rect(0, 0, this._map.width, this._map.height);
+        var mouseInArea = ctx.isPointInPath(this._mapHandle.mouse.x, this._mapHandle.mouse.y);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        return mouseInArea;
     }
 
 
     drawMapArea(ctx) {
         var context = this;
         this.mapAreaList.forEach((mapArea) => {
-            mapArea.draw(ctx, this.mouse);
+            mapArea.draw(ctx);
         })
     }
 
@@ -209,7 +201,7 @@ class MapRender {
             ctx.strokeStyle = "rgb(32, 144, 241)";
             ctx.lineJoin = "round";
             ctx.lineWidth = 2;
-            ctx.strokeRect(this.areaPoint[0].x, this.areaPoint[0].y, this.mouse.x - this.areaPoint[0].x, this.mouse.y - this.areaPoint[0].y);
+            ctx.strokeRect(this.areaPoint[0].x, this.areaPoint[0].y, this._mapHandle.mouse.x - this.areaPoint[0].x, this._mapHandle.mouse.y - this.areaPoint[0].y);
             ctx.closePath();
         } else if (this.drawAreaMode == "polygon") {
             console.log("drawPaintArea");
@@ -224,10 +216,10 @@ class MapRender {
                     ctx.lineTo(point.x, point.y);
                 }
             })
-            ctx.lineTo(this.mouse.x, this.mouse.y);
+            ctx.lineTo(this._mapHandle.mouse.x, this._mapHandle.mouse.y);
             ctx.stroke();
         } else if (this.drawAreaMode == "circle") {
-            var r = Util.getDistance(this.areaPoint[0], this.mouse);
+            var r = Util.getDistance(this.areaPoint[0], this._mapHandle.mouse);
             ctx.beginPath();
             ctx.strokeStyle = "rgb(32, 144, 241)";
             ctx.lineWidth = 2;
@@ -242,10 +234,8 @@ class MapRender {
             return;
         }
         ctx.beginPath();
-        if (this.mouseInArea && this.mouse.x > 0 && this.mouse.y > 0) {
-            ctx.arc(this.mouse.x, this.mouse.y, 4, 0, Math.PI * 2, true);
-            ctx.fillStyle = "rgb(32, 144, 241)";
-        }
+        ctx.arc(this._mapHandle.mouse.x, this._mapHandle.mouse.y, 4, 0, Math.PI * 2, true);
+        ctx.fillStyle = "rgb(32, 144, 241)";
         ctx.closePath();
         ctx.fill();
     }

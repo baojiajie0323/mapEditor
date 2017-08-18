@@ -1,35 +1,38 @@
 import Util from './util';
 
 class MapArea {
-    constructor(map, points, type) {
-        this.checkselected = false;
-        this.mouseInArea = false;
-        this.map = map;
-        this.mouse = { x: 0, y: 0 };
+    constructor(mapRender, type, points) {
+        this._mapRender = mapRender;
+        this.map = mapRender._map;
+        this._mapHandle = mapRender._mapHandle;
+
         this.type = type;
+        this.points = Object.assign([], points);
+        this.selected = false;
+        this.mouseInArea = false;
+
+        this.mouseState = "";
+        this.mouse = { x: 0, y: 0 };
+
         this.editMode = false;
         this.enableEdit = false;
         this.editType = "";
-        console.log("MapArea", points);
-        if (type == "circle") {
-            this.points = [];
-            this.points.push(points[0]);
-            this.r = Util.getDistance(points[1], points[0]);
-        }
-        else {
-            if (points.length == 2) {
-                this.points = [];
-                this.points.push(points[0]);
-                this.points.push({ x: points[1].x, y: points[0].y });
-                this.points.push(points[1]);
-                this.points.push({ x: points[0].x, y: points[1].y });
-            } else {
-                this.points = Object.assign([], points);
-            }
-        }
+
+
+        this.init();
     }
-    checkSelect(checkselect) {
-        this.checkselected = checkselect;
+    init() {
+        this._mapHandle.addListener("mousemove", this.onMouseMove.bind(this));
+        this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
+    }
+    onMouseMove(e) {
+
+    }
+    onMouseDown(e) {
+        if (this._mapRender.isAreaPainting()) {
+            return;
+        }
+
     }
     checkMouse(mouse) {
         this.mouse = mouse;
@@ -40,18 +43,28 @@ class MapArea {
     setEditMode(bEdit) {
         this.editMode = true;
     }
-    draw(ctx, mouse) {
-        console.log("mapArea draw", this.points, this.type);
+    draw(ctx) {
         if (this.editMode) {
             this.drawEditFrame(ctx, mouse);
         }
-
-
+        this.drawShape(ctx);
+    }
+    drawShape(ctx) {
+        const { mouse } = this._mapHandle;
         ctx.beginPath();
         ctx.lineJoin = "round";
         ctx.lineWidth = 1;
         if (this.type == "polygon") {
-            this.points.forEach((point, index) => {
+            var points = [];
+            if (this.points.length == 2) {
+                points.push(this.points[0]);
+                points.push({ x: this.points[1].x, y: this.points[0].y });
+                points.push(this.points[1]);
+                points.push({ x: this.points[0].x, y: this.points[1].y });
+            } else {
+                points = this.points;
+            }
+            points.forEach((point, index) => {
                 if (index == 0) {
                     ctx.moveTo(point.x, point.y);
                 } else {
@@ -60,19 +73,17 @@ class MapArea {
             })
             ctx.closePath();
         } else {
-            ctx.arc(this.points[0].x, this.points[0].y, this.r, 0, 2 * Math.PI);
+            var r = Util.getDistance(this.points[1], this.points[0]);
+            ctx.arc(this.points[0].x, this.points[0].y, r, 0, 2 * Math.PI);
         }
         ctx.fillStyle = "rgba(32, 144, 241,0.3)";
         ctx.fill();
         ctx.strokeStyle = "rgba(32, 144, 241,0.5)";
-        if (!this.editMode && this.checkselected) {
-            if (ctx.isPointInPath(this.mouse.x, this.mouse.y)) {
-                this.mouseInArea = true;
-                ctx.strokeStyle = "rgb(255, 110, 11)";
-                ctx.lineWidth = 2;
-            } else {
-                this.mouseInArea = false;
-            }
+        this.mouseInArea = ctx.isPointInPath(mouse.x, mouse.y);
+           
+        if(this.selected){
+            ctx.strokeStyle = "rgb(255, 110, 11)";
+            ctx.lineWidth = 2;
         }
         ctx.stroke();
     }

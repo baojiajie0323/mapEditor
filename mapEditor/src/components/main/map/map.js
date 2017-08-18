@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import MapRender from './maprender';
+import MapRender from './mapRender';
 import Paper from 'material-ui/Paper';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
