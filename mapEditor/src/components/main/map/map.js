@@ -79,6 +79,7 @@ class Map extends React.Component {
             left: menuMouse.x,
             top: menuMouse.y,
             display: 'inline-block',
+            transition: 'all 0s ease'
         }
         return <div ref={(c) => { this.mapContainer = c }} className={styles.map}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapcanvas"></canvas>

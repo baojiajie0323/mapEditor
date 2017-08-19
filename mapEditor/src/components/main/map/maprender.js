@@ -9,7 +9,6 @@ class MapRender {
 
         this.contextmenucb = null;
         this.showMousePoint = true;
-        this.mouseInArea = false;
 
         this.drawAreaMode = "";
         this.areaPoint = [];
@@ -28,110 +27,55 @@ class MapRender {
         this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
         this._mapHandle.addListener("mouseleave", this.onMouseLeave.bind(this));
     }
-    addMapArea(type,points) {
+    addMapArea(type, points) {
         var mapArea = new MapArea(this, type, points);
-        this.mapAreaList.push(mapArea);  
+        this.mapAreaList.push(mapArea);
     }
-    isAreaPainting(){
+    isAreaPainting() {
         return !!this.drawAreaMode;
     }
     setDrawMode(drawMode) {
         this.drawAreaMode = drawMode;
         this.areaPoint = [];
-        this.draw();
     }
     onMouseDown(e) {
         var leftClick = e.button == 0;
-        if (this.drawAreaMode) {
+        if (this.drawAreaMode && leftClick) {
             //绘制模式
-            if (leftClick) {
-                var point = this._mapHandle.mouse;
-                this.areaPoint.push(point);
-                if (this.drawAreaMode == "rect") {
-                    // 矩形框绘制的时候 第二个点就可以认为是绘制结束
-                    if (this.areaPoint.length == 2) {
-                        this.addMapArea("polygon",this.areaPoint);
-                        this.areaPoint.length = 0;
-                    }
-                } else if (this.drawAreaMode == "polygon") {
-                    if (this.areaPoint.length >= 2) {
-                        if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
-                            this.addMapArea("polygon",this.areaPoint);
-                            this.areaPoint.length = 0;
-                        }
-                    }
-                } else if (this.drawAreaMode == "circle") {
-                    // 圆形绘制的时候 第二个点就可以认为是绘制结束
-                    if (this.areaPoint.length == 2) {
-                        this.addMapArea("circle",this.areaPoint);
+            var point = this._mapHandle.mouse;
+            this.areaPoint.push(point);
+            if (this.drawAreaMode == "rect") {
+                // 矩形框绘制的时候 第二个点就可以认为是绘制结束
+                if (this.areaPoint.length == 2) {
+                    var points = [];
+                    points.push(this.areaPoint[0]);
+                    points.push({ x: this.areaPoint[1].x, y: this.areaPoint[0].y });
+                    points.push(this.areaPoint[1]);
+                    points.push({ x: this.areaPoint[0].x, y: this.areaPoint[1].y });
+                    this.addMapArea("polygon", points);
+                    this.areaPoint.length = 0;
+                }
+            } else if (this.drawAreaMode == "polygon") {
+                if (this.areaPoint.length >= 2) {
+                    if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
+                        this.addMapArea("polygon", this.areaPoint);
                         this.areaPoint.length = 0;
                     }
                 }
-                this.draw();
-            }
-        } else {
-            this.checkMouseInArea()
-            if (!leftClick) {
-                for (var i = 0; i < this.mapAreaList.length; i++) {
-                    var mapArea = this.mapAreaList[i];
-                    if (mapArea.mouseInArea) {
-                        var menu = [
-                            { title: '编辑元素', onClick: this.onClickEdit.bind(this) },
-                            { title: '拆分元素', onClick: this.onClickEdit },
-                            { title: '' },
-                            { title: '查看属性数据', onClick: this.onClickEdit },
-                            { title: '删除元素', onClick: this.onClickEdit },
-                        ]
-                        this.contextmenucb(true, menu, this._mapHandle.mouse);
-                        break;
-                    }
+            } else if (this.drawAreaMode == "circle") {
+                // 圆形绘制的时候 第二个点就可以认为是绘制结束
+                if (this.areaPoint.length == 2) {
+                    this.addMapArea("circle", this.areaPoint);
+                    this.areaPoint.length = 0;
                 }
             }
+            this.draw();
         }
     }
     onMouseMove(e) {
-        if (this.drawAreaMode) {
-            this.draw();
-        } else {
-            // if (e.which == 1) {
-            //     if (this.curmouseInArea && this.curmouseInArea.editMode &&
-            //         this.curmouseInArea.editType){
-
-            //         }
-            // }
-            // else {
-            if (this.curmouseInArea && this.curmouseInArea.editMode) {
-                this.draw();
-            }
-            //}
-        }
+        this.draw();
     }
     onMouseLeave(e) {
-        this.draw();
-    }
-
-    checkMouseInArea() {
-        this.curmouseInArea = null;
-        for (var i = 0; i < this.mapAreaList.length; i++) {
-            var mapArea = this.mapAreaList[i];
-            mapArea.checkMouse(this._mapHandle.mouse);
-            mapArea.checkEdit(true);
-        }
-        this.draw();
-        for (var i = 0; i < this.mapAreaList.length; i++) {
-            var mapArea = this.mapAreaList[i];
-            if (mapArea.mouseInArea) {
-                this.curmouseInArea = mapArea;
-            }
-        }
-        console.log(this.curmouseInArea);
-    }
-
-    onClickEdit() {
-        console.log("onClickEdit");
-        if (this.curmouseInArea) {
-            this.curmouseInArea.setEditMode();
-        }
         this.draw();
     }
 
@@ -143,7 +87,6 @@ class MapRender {
                 return this.areaPoint[0];
             }
         }
-
         // 已绘制完的区域的顶点需要有吸附功能
         for (var i = 0; i < this.mapAreaList.length; i++) {
             var mapArea = this.mapAreaList[i];
@@ -156,15 +99,16 @@ class MapRender {
         }
     }
     draw() {
-        console.log("draw");
+        console.time("mapRender");
         var ctx = this._map.getContext('2d');
         ctx.clearRect(0, 0, this._map.width, this._map.height);
         var mouseInArea = this.drawMapBoundary(ctx);
         this.drawMapArea(ctx);
         this.drawPaintArea(ctx);
-        if(mouseInArea){
+        if (mouseInArea) {
             this.drawCurPoint(ctx);
-        }        
+        }
+        console.timeEnd("mapRender");
     }
 
     drawMapBoundary(ctx) {

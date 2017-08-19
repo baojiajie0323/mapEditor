@@ -12,10 +12,8 @@ class MapArea {
         this.mouseInArea = false;
 
         this.mouseState = "";
-        this.mouse = { x: 0, y: 0 };
 
         this.editMode = false;
-        this.enableEdit = false;
         this.editType = "";
 
 
@@ -24,6 +22,7 @@ class MapArea {
     init() {
         this._mapHandle.addListener("mousemove", this.onMouseMove.bind(this));
         this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
+        this._mapHandle.addListener("mouseup", this.onMouseUp.bind(this));
     }
     onMouseMove(e) {
 
@@ -32,20 +31,49 @@ class MapArea {
         if (this._mapRender.isAreaPainting()) {
             return;
         }
+        var lbutton = e.button == 0;
 
+        console.log("onMouseDown", this.selected, this.mouseInArea);
+        if (this.editMode) {
+            if (this.cursor == "se-resize" || this.cursor == "sw-resize") {
+                this.editType = "zoom";
+            } else if (this.cursor == "pointer") {
+                this.editType = "rotate";
+            } else {
+                this.editType = ""
+            }
+            return;
+        }
+        if (this.selected != this.mouseInArea) {
+            this.selected = this.mouseInArea;
+            if (!this.selected) {
+                this.editMode = false;
+            }
+            this._mapRender.draw();
+        }
+        if (!lbutton) {
+            if (this.mouseInArea) {
+                var menu = [
+                    { title: '编辑元素', onClick: this.onClickEdit.bind(this) },
+                    { title: '拆分元素', onClick: this.onClickEdit },
+                    { title: '' },
+                    { title: '查看属性数据', onClick: this.onClickEdit },
+                    { title: '删除元素', onClick: this.onClickEdit },
+                ]
+                this._mapRender.contextmenucb(true, menu, this._mapHandle.mouse);
+            }
+        }
     }
-    checkMouse(mouse) {
-        this.mouse = mouse;
+    onMouseUp(e) {
+        this.editType = "";
     }
-    checkEdit(mouse) {
-        this.enableEdit = true;
-    }
-    setEditMode(bEdit) {
+    onClickEdit() {
         this.editMode = true;
+        this._mapRender.draw();
     }
     draw(ctx) {
         if (this.editMode) {
-            this.drawEditFrame(ctx, mouse);
+            this.drawEditFrame(ctx);
         }
         this.drawShape(ctx);
     }
@@ -55,16 +83,7 @@ class MapArea {
         ctx.lineJoin = "round";
         ctx.lineWidth = 1;
         if (this.type == "polygon") {
-            var points = [];
-            if (this.points.length == 2) {
-                points.push(this.points[0]);
-                points.push({ x: this.points[1].x, y: this.points[0].y });
-                points.push(this.points[1]);
-                points.push({ x: this.points[0].x, y: this.points[1].y });
-            } else {
-                points = this.points;
-            }
-            points.forEach((point, index) => {
+            this.points.forEach((point, index) => {
                 if (index == 0) {
                     ctx.moveTo(point.x, point.y);
                 } else {
@@ -80,31 +99,31 @@ class MapArea {
         ctx.fill();
         ctx.strokeStyle = "rgba(32, 144, 241,0.5)";
         this.mouseInArea = ctx.isPointInPath(mouse.x, mouse.y);
-           
-        if(this.selected){
+
+        if (this.selected && !this.editMode) {
             ctx.strokeStyle = "rgb(255, 110, 11)";
             ctx.lineWidth = 2;
         }
         ctx.stroke();
     }
-    drawEditFrame(ctx, mouse) {
+    drawEditFrame(ctx) {
+        const { mouse } = this._mapHandle;
+        var x1, x2, y1, y2;
         if (this.type == "polygon") {
             var arr_x = this.points.map((p) => { return p.x });
             var arr_y = this.points.map((p) => { return p.y });
-            var x1 = Math.min.apply(null, arr_x) - 2;
-            var y1 = Math.min.apply(null, arr_y) - 2;
-            var x2 = Math.max.apply(null, arr_x) + 2;
-            var y2 = Math.max.apply(null, arr_y) + 2;
+            x1 = Math.min.apply(null, arr_x) - 2;
+            y1 = Math.min.apply(null, arr_y) - 2;
+            x2 = Math.max.apply(null, arr_x) + 2;
+            y2 = Math.max.apply(null, arr_y) + 2;
         } else {
             var cc = this.points[0];
-            var x1 = cc.x - this.r - 2;
-            var y1 = cc.y - this.r - 2;
-            var x2 = cc.x + this.r + 2;
-            var y2 = cc.y + this.r + 2;
+            var r = Util.getDistance(this.points[1], this.points[0]);
+            x1 = cc.x - r - 2;
+            y1 = cc.y - r - 2;
+            x2 = cc.x + r + 2;
+            y2 = cc.y + r + 2;
         }
-
-        console.log("drawEditFrame", x1, y1, x2 - x1, y2 - y1, "mouse:", mouse.x, mouse.y);
-
         ctx.beginPath();
         ctx.setLineDash([5, 2]);
         ctx.lineWidth = 2;
@@ -115,58 +134,55 @@ class MapArea {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        var cursor = "default";
+        if(!this.editType){
+            this.cursor = "default";
+        }
         ctx.beginPath();
-        ctx.arc(x1 + (x2 - x1) / 2, y1 - 22, 3, 0, Math.PI * 2);
+        ctx.arc(x1 + (x2 - x1) / 2, y1 - 23, 5, 0, Math.PI * 2);
         if (ctx.isPointInPath(mouse.x, mouse.y)) {
-            cursor = "pointer";
-            this.editType = "rotate";
+            this.cursor = "pointer";
         }
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.rect(x1 - 3, y1 - 3, 6, 6);
+        ctx.rect(x1 - 5, y1 - 5, 10, 10);
         if (ctx.isPointInPath(mouse.x, mouse.y)) {
-            cursor = "se-resize";
-            this.editType = "zoom";
+            this.cursor = "se-resize";
         }
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.rect(x1 - 3, y2 - 3, 6, 6);
+        ctx.rect(x1 - 5, y2 - 5, 10, 10);
         if (ctx.isPointInPath(mouse.x, mouse.y)) {
-            cursor = "sw-resize";
-            this.editType = "zoom";
+            this.cursor = "sw-resize";
         }
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.rect(x2 - 3, y1 - 3, 6, 6);
+        ctx.rect(x2 - 5, y1 - 5, 10, 10);
         if (ctx.isPointInPath(mouse.x, mouse.y)) {
-            cursor = "sw-resize";
-            this.editType = "zoom";
+            this.cursor = "sw-resize";
         }
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.rect(x2 - 3, y2 - 3, 6, 6);
+        ctx.rect(x2 - 5, y2 - 5, 10, 10);
         if (ctx.isPointInPath(mouse.x, mouse.y)) {
-            cursor = "se-resize";
-            this.editType = "zoom";
+            this.cursor = "se-resize";
         }
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fill();
         ctx.stroke();
 
-        this.map.style.cursor = cursor;
+        this.map.style.cursor = this.cursor;
     }
 }
 
