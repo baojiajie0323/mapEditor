@@ -99,7 +99,7 @@ class MapRender {
         }
     }
     draw() {
-        console.time("mapRender");
+        //console.time("mapRender");
         var ctx = this._map.getContext('2d');
         ctx.clearRect(0, 0, this._map.width, this._map.height);
         var mouseInArea = this.drawMapBoundary(ctx);
@@ -108,7 +108,7 @@ class MapRender {
         if (mouseInArea) {
             this.drawCurPoint(ctx);
         }
-        console.timeEnd("mapRender");
+        //console.timeEnd("mapRender");
     }
 
     drawMapBoundary(ctx) {

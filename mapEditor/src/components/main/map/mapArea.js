@@ -8,6 +8,7 @@ class MapArea {
 
         this.type = type;
         this.points = Object.assign([], points);
+        this.scale = 1;
         this.selected = false;
         this.mouseInArea = false;
 
@@ -34,14 +35,30 @@ class MapArea {
         var lbutton = e.button == 0;
 
         console.log("onMouseDown", this.selected, this.mouseInArea);
+        if (!lbutton) {
+            if (this.mouseInArea) {
+                var menu = [
+                    { title: this.editMode ? '停止编辑' : '编辑元素', onClick: this.onClickEdit.bind(this) },
+                    { title: '拆分元素', onClick: this.onClickEdit },
+                    { title: '' },
+                    { title: '查看属性数据', onClick: this.onClickEdit },
+                    { title: '删除元素', onClick: this.onClickEdit },
+                ]
+                this._mapRender.contextmenucb(true, menu, this._mapHandle.mouse);
+            }
+        }
         if (this.editMode) {
             if (this.cursor == "se-resize" || this.cursor == "sw-resize") {
                 this.editType = "zoom";
+                this.zoomStartPoint = this._mapHandle.mouse;
             } else if (this.cursor == "pointer") {
                 this.editType = "rotate";
+            } else if (this.cursor == "move") {
+                this.editType = "move"
             } else {
-                this.editType = ""
+                this.editType = "";
             }
+
             return;
         }
         if (this.selected != this.mouseInArea) {
@@ -51,33 +68,33 @@ class MapArea {
             }
             this._mapRender.draw();
         }
-        if (!lbutton) {
-            if (this.mouseInArea) {
-                var menu = [
-                    { title: '编辑元素', onClick: this.onClickEdit.bind(this) },
-                    { title: '拆分元素', onClick: this.onClickEdit },
-                    { title: '' },
-                    { title: '查看属性数据', onClick: this.onClickEdit },
-                    { title: '删除元素', onClick: this.onClickEdit },
-                ]
-                this._mapRender.contextmenucb(true, menu, this._mapHandle.mouse);
-            }
-        }
     }
     onMouseUp(e) {
         this.editType = "";
     }
     onClickEdit() {
-        this.editMode = true;
+        this.editMode = !this.editMode;
         this._mapRender.draw();
     }
     draw(ctx) {
+        var centerpoint = Util.getCenterPoint(this.points);
+        if (this.editType == "zoom") {
+            var originDistance = Util.getDistance(this.zoomStartPoint, centerpoint);
+            var newDistance = Util.getDistance(this._mapHandle.mouse, centerpoint);
+            this.scale = newDistance / originDistance;
+        }
+        ctx.save();
+        ctx.scale(this.scale,this.scale);
+        ctx.translate(centerpoint.x / this.scale - centerpoint.x, centerpoint.y / this.scale - centerpoint.y);
         if (this.editMode) {
             this.drawEditFrame(ctx);
         }
         this.drawShape(ctx);
+
+        ctx.restore();
     }
     drawShape(ctx) {
+        var scale = 2;
         const { mouse } = this._mapHandle;
         ctx.beginPath();
         ctx.lineJoin = "round";
@@ -134,7 +151,7 @@ class MapArea {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        if(!this.editType){
+        if (!this.editType) {
             this.cursor = "default";
         }
         ctx.beginPath();
