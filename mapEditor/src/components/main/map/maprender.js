@@ -58,6 +58,7 @@ class MapRender {
             } else if (this.drawAreaMode == "polygon") {
                 if (this.areaPoint.length >= 2) {
                     if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
+                        this.areaPoint.splice(this.areaPoint.length - 1,1);
                         this.addMapArea("polygon", this.areaPoint);
                         this.areaPoint.length = 0;
                     }

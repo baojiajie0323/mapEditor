@@ -8,7 +8,7 @@ class MapArea {
 
         this.type = type;
         this.points = Object.assign([], points);
-        this.scale = 1;
+        this.centerpoint = Util.getCenterPoint(this.points,this.type);
         this.selected = false;
         this.mouseInArea = false;
 
@@ -26,7 +26,14 @@ class MapArea {
         this._mapHandle.addListener("mouseup", this.onMouseUp.bind(this));
     }
     onMouseMove(e) {
-
+        if (this.editType == "zoom") {
+            var originDistance = Util.getDistance(this.zoomStartPoint, this.centerpoint);
+            var newDistance = Util.getDistance(this._mapHandle.mouse, this.centerpoint);
+            var scale = newDistance / originDistance;
+            this.recalcPoints(scale);
+            //this._mapRender.draw();
+            this.zoomStartPoint = this._mapHandle.mouse;
+        }
     }
     onMouseDown(e) {
         if (this._mapRender.isAreaPainting()) {
@@ -72,20 +79,33 @@ class MapArea {
     onMouseUp(e) {
         this.editType = "";
     }
+    recalcPoints(scale, rotate) {        
+        console.log("recalcPoints", this.centerpoint,scale);
+        this.points.forEach((p) => {
+
+            console.log("recalcPoints1", p);
+            var xd = p.x - this.centerpoint.x;
+            var yd = p.y - this.centerpoint.y;
+            p.x = xd * scale + this.centerpoint.x;
+            p.y = yd * scale + this.centerpoint.y;
+
+            console.log("recalcPoints2", p);
+        });
+    }
     onClickEdit() {
         this.editMode = !this.editMode;
         this._mapRender.draw();
     }
     draw(ctx) {
-        var centerpoint = Util.getCenterPoint(this.points);
-        if (this.editType == "zoom") {
-            var originDistance = Util.getDistance(this.zoomStartPoint, centerpoint);
-            var newDistance = Util.getDistance(this._mapHandle.mouse, centerpoint);
-            this.scale = newDistance / originDistance;
-        }
-        ctx.save();
-        ctx.scale(this.scale,this.scale);
-        ctx.translate(centerpoint.x / this.scale - centerpoint.x, centerpoint.y / this.scale - centerpoint.y);
+        // var centerpoint = Util.getCenterPoint(this.points);
+        // if (this.editType == "zoom") {
+        //     var originDistance = Util.getDistance(this.zoomStartPoint, centerpoint);
+        //     var newDistance = Util.getDistance(this._mapHandle.mouse, centerpoint);
+        //     this.scale = newDistance / originDistance;
+        // }
+        // ctx.save();
+        // ctx.scale(this.scale,this.scale);
+        // ctx.translate(centerpoint.x / this.scale - centerpoint.x, centerpoint.y / this.scale - centerpoint.y);
         if (this.editMode) {
             this.drawEditFrame(ctx);
         }
@@ -94,7 +114,6 @@ class MapArea {
         ctx.restore();
     }
     drawShape(ctx) {
-        var scale = 2;
         const { mouse } = this._mapHandle;
         ctx.beginPath();
         ctx.lineJoin = "round";
