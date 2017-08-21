@@ -8,7 +8,7 @@ class MapArea {
 
         this.type = type;
         this.points = Object.assign([], points);
-        this.centerpoint = Util.getCenterPoint(this.points,this.type);
+        this.centerpoint = Util.getCenterPoint(this.points, this.type);
         this.selected = false;
         this.mouseInArea = false;
 
@@ -30,9 +30,20 @@ class MapArea {
             var originDistance = Util.getDistance(this.zoomStartPoint, this.centerpoint);
             var newDistance = Util.getDistance(this._mapHandle.mouse, this.centerpoint);
             var scale = newDistance / originDistance;
-            this.recalcPoints(scale);
-            //this._mapRender.draw();
+            this.translatePoints(0, 0, scale);
             this.zoomStartPoint = this._mapHandle.mouse;
+        } else if (this.editType == "rotate") {
+            var originAngle = Util.getAngle(this.rotateStartPoint, this.centerpoint);
+            var newAngle = Util.getAngle(this._mapHandle.mouse, this.centerpoint);
+            var rotate = originAngle - newAngle;
+            console.log("angle:", newAngle, rotate);
+            this.translatePoints(0, 0, 1, rotate);
+            this.rotateStartPoint = this._mapHandle.mouse;
+        } else if (this.editType == "move") {
+            var originPoint = this.moveStartPoint;
+            var newPoint = this._mapHandle.mouse;
+            this.translatePoints(newPoint.x - originPoint.x, newPoint.y - originPoint.y);
+            this.moveStartPoint = this._mapHandle.mouse;
         }
     }
     onMouseDown(e) {
@@ -54,14 +65,16 @@ class MapArea {
                 this._mapRender.contextmenucb(true, menu, this._mapHandle.mouse);
             }
         }
-        if (this.editMode) {
+        if (this.editMode && lbutton) {
             if (this.cursor == "se-resize" || this.cursor == "sw-resize") {
                 this.editType = "zoom";
                 this.zoomStartPoint = this._mapHandle.mouse;
             } else if (this.cursor == "pointer") {
                 this.editType = "rotate";
+                this.rotateStartPoint = this._mapHandle.mouse;
             } else if (this.cursor == "move") {
                 this.editType = "move"
+                this.moveStartPoint = this._mapHandle.mouse;
             } else {
                 this.editType = "";
             }
@@ -79,17 +92,38 @@ class MapArea {
     onMouseUp(e) {
         this.editType = "";
     }
-    recalcPoints(scale, rotate) {        
-        console.log("recalcPoints", this.centerpoint,scale);
-        this.points.forEach((p) => {
+    translatePoints(offsetx, offsety, scale, rotate) {
+        console.log("translatePoints", this.centerpoint, scale, rotate);
+        var context = this;
+        this.points.forEach((p, index) => {
+            console.log("translatePoints1", p,offsetx,offsety);
+            // if (context.type == "circle" && index >= 1) {
+            //     return;
+            // }
+            if (offsetx) {
+                p.x += offsetx;
+                this.centerpoint.x += offsetx;
+            }
+            if (offsety) {
+                p.y += offsety;
+                this.centerpoint.y += offsety;
+            }
+            if (scale) {
+                var xd = p.x - this.centerpoint.x;
+                var yd = p.y - this.centerpoint.y;
+                p.x = xd * scale + this.centerpoint.x;
+                p.y = yd * scale + this.centerpoint.y;
+            }
 
-            console.log("recalcPoints1", p);
-            var xd = p.x - this.centerpoint.x;
-            var yd = p.y - this.centerpoint.y;
-            p.x = xd * scale + this.centerpoint.x;
-            p.y = yd * scale + this.centerpoint.y;
+            if (rotate) {
+                var angle = rotate * 2 * Math.PI / 360;
+                var x = p.x;
+                var y = p.y;
+                p.x = (x - this.centerpoint.x) * Math.cos(angle) - (y - this.centerpoint.y) * Math.sin(angle) + this.centerpoint.x;
+                p.y = (x - this.centerpoint.x) * Math.sin(angle) + (y - this.centerpoint.y) * Math.cos(angle) + this.centerpoint.y;
+            }
 
-            console.log("recalcPoints2", p);
+            console.log("translatePoints2", p);
         });
     }
     onClickEdit() {
@@ -218,6 +252,9 @@ class MapArea {
         ctx.fill();
         ctx.stroke();
 
+        if (this.mouseInArea) {
+            this.cursor = "move";
+        }
         this.map.style.cursor = this.cursor;
     }
 }

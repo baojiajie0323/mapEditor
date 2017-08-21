@@ -22,7 +22,7 @@ class EditorPanel extends React.Component {
                 contentContainerStyle={{position:'absolute',top:'72px',bottom:0,width:'100%'}}
                 tabTemplateStyle={{position:'absolute',height:'100%',width:'100%'}}
                 tabItemContainerStyle={{ backgroundColor: 'rgb(32, 144, 241)' }}
-                inkBarStyle={{ backgroundColor: 'white' }}>
+                >
                 <Tab
                     icon={<EditIcon />}
                     label="绘制"
