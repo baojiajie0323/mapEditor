@@ -1,13 +1,15 @@
 import Util from './util';
 
 class MapArea {
-    constructor(mapRender, type, points) {
+    constructor(mapRender, type, points, text) {
         this._mapRender = mapRender;
         this.map = mapRender._map;
         this._mapHandle = mapRender._mapHandle;
 
         this.type = type;
         this.points = Object.assign([], points);
+        this.text = text;
+
         this.centerpoint = Util.getCenterPoint(this.points, this.type);
         this.selected = false;
         this.mouseInArea = false;
@@ -94,19 +96,23 @@ class MapArea {
     }
     translatePoints(offsetx, offsety, scale, rotate) {
         console.log("translatePoints", this.centerpoint, scale, rotate);
+        if (offsetx) {
+            this.centerpoint.x += offsetx;
+        }
+        if (offsety) {
+            this.centerpoint.y += offsety;
+        }
         var context = this;
         this.points.forEach((p, index) => {
-            console.log("translatePoints1", p,offsetx,offsety);
+            console.log("translatePoints1", p, offsetx, offsety);
             // if (context.type == "circle" && index >= 1) {
             //     return;
             // }
             if (offsetx) {
                 p.x += offsetx;
-                this.centerpoint.x += offsetx;
             }
             if (offsety) {
                 p.y += offsety;
-                this.centerpoint.y += offsety;
             }
             if (scale) {
                 var xd = p.x - this.centerpoint.x;
@@ -131,21 +137,11 @@ class MapArea {
         this._mapRender.draw();
     }
     draw(ctx) {
-        // var centerpoint = Util.getCenterPoint(this.points);
-        // if (this.editType == "zoom") {
-        //     var originDistance = Util.getDistance(this.zoomStartPoint, centerpoint);
-        //     var newDistance = Util.getDistance(this._mapHandle.mouse, centerpoint);
-        //     this.scale = newDistance / originDistance;
-        // }
-        // ctx.save();
-        // ctx.scale(this.scale,this.scale);
-        // ctx.translate(centerpoint.x / this.scale - centerpoint.x, centerpoint.y / this.scale - centerpoint.y);
         if (this.editMode) {
             this.drawEditFrame(ctx);
         }
         this.drawShape(ctx);
-
-        ctx.restore();
+        this.drawText(ctx);
     }
     drawShape(ctx) {
         const { mouse } = this._mapHandle;
@@ -256,6 +252,18 @@ class MapArea {
             this.cursor = "move";
         }
         this.map.style.cursor = this.cursor;
+    }
+    drawText(ctx) {
+        ctx.save();
+        ctx.font = "15px Arial";
+        ctx.textAlign = "center";
+        ctx.fillStyle = '#fff';
+        //ctx.fillText("一监区", this.centerpoint.x-1, this.centerpoint.y + 2);
+        ctx.fillStyle = '#333';
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1;
+        ctx.strokeText("一监区", this.centerpoint.x, this.centerpoint.y + 3);
+        ctx.restore();
     }
 }
 
