@@ -19,8 +19,7 @@ import { grey800 } from 'material-ui/styles/colors';
 const Header = ({ dispatch }) => {
   return (
     <header className={styles.header}>
-      <div className={styles.logo}></div>
-      <p>小幽地图编辑器</p>
+      <p>科达云地图编辑器</p>
       <RaisedButton
         label="预览地图"
         icon={<PreviewIcon color={grey800} />}
@@ -49,8 +48,8 @@ const Header = ({ dispatch }) => {
       />
       <IconButton style={{ marginLeft: '100px' }} tooltip="帮助">
         <HelpIcon color={grey800} />
-      </IconButton>
-      <div className={styles.user}></div>
+      </IconButton>      
+      <div className={styles.logo}></div>
     </header>
   );
 };

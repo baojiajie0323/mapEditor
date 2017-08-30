@@ -15,7 +15,7 @@ class MapArea {
         this.mouseInArea = false;
 
         this.mouseState = "";
-
+ 
         this.editMode = false;
         this.editType = "";
 
@@ -255,14 +255,11 @@ class MapArea {
     }
     drawText(ctx) {
         ctx.save();
-        ctx.font = "15px Arial";
+        ctx.font = "12px Arial";
         ctx.textAlign = "center";
-        ctx.fillStyle = '#fff';
-        //ctx.fillText("一监区", this.centerpoint.x-1, this.centerpoint.y + 2);
         ctx.fillStyle = '#333';
-        ctx.strokeStyle = "#333";
         ctx.lineWidth = 1;
-        ctx.strokeText("一监区", this.centerpoint.x, this.centerpoint.y + 3);
+        ctx.fillText("一监区", this.centerpoint.x, this.centerpoint.y + 3);
         ctx.restore();
     }
 }

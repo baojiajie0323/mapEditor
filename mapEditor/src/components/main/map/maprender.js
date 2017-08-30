@@ -58,7 +58,7 @@ class MapRender {
             } else if (this.drawAreaMode == "polygon") {
                 if (this.areaPoint.length >= 2) {
                     if (this.areaPoint[0].x == point.x && this.areaPoint[0].y == point.y) {
-                        this.areaPoint.splice(this.areaPoint.length - 1,1);
+                        this.areaPoint.splice(this.areaPoint.length - 1, 1);
                         this.addMapArea("polygon", this.areaPoint);
                         this.areaPoint.length = 0;
                     }
@@ -175,6 +175,12 @@ class MapRender {
         }
     }
     drawCurPoint(ctx) {
+        ctx.save();
+        ctx.font = "12px Arial";
+        ctx.fillStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.fillText(`${this._mapHandle.mouse.x},${this._mapHandle.mouse.y}`, 5, 15);
+
         if (!this.drawAreaMode) {
             return;
         }
@@ -183,6 +189,8 @@ class MapRender {
         ctx.fillStyle = "rgb(32, 144, 241)";
         ctx.closePath();
         ctx.fill();
+        
+        ctx.restore();
     }
 
 }
