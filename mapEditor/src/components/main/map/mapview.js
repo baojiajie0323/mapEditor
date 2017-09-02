@@ -9,6 +9,7 @@ class MapView extends React.Component {
         }
         this.mapContainer = null;
         this.mapCanvas = null;
+        this.animate = this.animate.bind(this);
     }
     componentDidMount() {
         var mapWidth = this.mapContainer.offsetWidth;
@@ -19,26 +20,34 @@ class MapView extends React.Component {
         this.initThree();
     }
     initThree() {
+        console.log("initThree");
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.mapCanvas
         });
 
-        this.renderer.setClearColor(0x000000);
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(45, 4 / 3, 1, 1000);
-        camera.position.set(0, 0, 5);
-        scene.add(camera);
-        var cube = new THREE.Mesh(new THREE.CubeGeometry(1, 2, 3),
+        this.renderer.setClearColor(0xffffff);
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.OrthographicCamera(-20,20,1.5,-1.5, 1, 1000);
+        this.camera.position.set(0, 0, 5);
+        this.scene.add(this.camera);
+        var cube = new THREE.Mesh(new THREE.CubeGeometry(20, 1, 10),
             new THREE.MeshBasicMaterial({
-                color: 0xff0000
+                color: 0xff0000,
+                wireframe: true
             })
         );
-        scene.add(cube);
-        this.renderer.render(scene, camera);
+        this.scene.add(cube);
 
-        requestAnimationFrame(animate);
-        controls.update();
-        this.renderer.render(scene, camera);
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.animate();
+    }
+    animate() {
+        requestAnimationFrame(this.animate);
+        this.renderer.render(this.scene, this.camera);
+        //stats.update();
+    }
+    updateControls() {
+        this.controls.update();
     }
 
     render() {
