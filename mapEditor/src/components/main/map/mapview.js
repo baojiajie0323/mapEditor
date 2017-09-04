@@ -45,17 +45,17 @@ class MapView extends React.Component {
         this.scene.add(this.camera);
     }
     initLight() {
-        var light = new THREE.DirectionalLight(0xffffff, 0.9);
+        var light = new THREE.DirectionalLight(0xffffff, 0.8);
         //var light = new THREE.AmbientLight(0xffffff, 1);
         
-        light.position.set(0, 150, 0);
+        light.position.set(10, 150, 10);
         this.scene.add(light);
     }
     addGround() {
         var ground = new THREE.Mesh(new THREE.CubeGeometry(1000, this._groundHeight, 650),
             new THREE.MeshLambertMaterial({
-                //color: 0xBBFFFF,
-                //ambient: 0x858685,
+                color: 0xf1f6f7,
+                ambient: 0x858685,
                 emissive: 0x858685,
                 //wireframe: true
             })
