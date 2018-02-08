@@ -3,13 +3,13 @@
 1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
 1 verbose cli   'start' ]
 2 info using npm@3.10.10
-3 info using node@v6.9.5
+3 info using node@v6.11.5
 4 verbose stack Error: ENOENT: no such file or directory, open 'D:\mapEditor\package.json'
 4 verbose stack     at Error (native)
 5 verbose cwd D:\mapEditor
 6 error Windows_NT 6.1.7601
 7 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "start"
-8 error node v6.9.5
+8 error node v6.11.5
 9 error npm  v3.10.10
 10 error path D:\mapEditor\package.json
 11 error code ENOENT

@@ -15,7 +15,7 @@ class MapArea {
         this.mouseInArea = false;
 
         this.mouseState = "";
- 
+
         this.editMode = false;
         this.editType = "";
 
@@ -58,11 +58,11 @@ class MapArea {
         if (!lbutton) {
             if (this.mouseInArea) {
                 var menu = [
-                    { title: this.editMode ? '停止编辑' : '编辑元素', onClick: this.onClickEdit.bind(this) },
+                    { title: this.editMode ? '停止编辑' : '编辑元素', onClick: this.onClickEdit },
                     { title: '拆分元素', onClick: this.onClickEdit },
                     { title: '' },
                     { title: '查看属性数据', onClick: this.onClickEdit },
-                    { title: '删除元素', onClick: this.onClickEdit },
+                    { title: '删除元素', onClick: this.onClickDelete },
                 ]
                 this._mapRender.contextmenucb(true, menu, this._mapHandle.mouse);
             }
@@ -132,9 +132,12 @@ class MapArea {
             console.log("translatePoints2", p);
         });
     }
-    onClickEdit() {
+    onClickEdit = () => {
         this.editMode = !this.editMode;
         this._mapRender.draw();
+    }
+    onClickDelete = () => {
+        alert('onclickdelete');
     }
     draw(ctx) {
         if (this.editMode) {

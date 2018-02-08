@@ -8,9 +8,9 @@ import styles from './main.less';
 const Main = ({ dispatch }) => {
   return (
     <div className={styles.main}>
-      {/*<EditorPanel />
-      <Map />*/}
-      <MapView />
+      <EditorPanel />
+      <Map />
+      {/* <MapView /> */}
     </div>
   );
 };

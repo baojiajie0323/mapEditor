@@ -1,24 +1,23 @@
 import MapArea from './mapArea';
 import MapHandle from './mapHandle';
+import MapData from './mapData';
 import Util from './util';
 
 class MapRender {
     constructor(canvas) {
         this._map = canvas;
         this._mapHandle = null;
-
         this.contextmenucb = null;
         this.showMousePoint = true;
 
         this.drawAreaMode = "";
         this.areaPoint = [];
 
-        this.mapAreaList = [];
-
         this.init();
     }
     init() {
         this.initHandle();
+        this.initData();
         this.draw();
     }
     initHandle() {
@@ -27,9 +26,12 @@ class MapRender {
         this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
         this._mapHandle.addListener("mouseleave", this.onMouseLeave.bind(this));
     }
+    initData() {
+        this._mapData = new MapData();
+    }
     addMapArea(type, points) {
         var mapArea = new MapArea(this, type, points);
-        this.mapAreaList.push(mapArea);
+        this._mapData.addArea(mapArea);
     }
     isAreaPainting() {
         return !!this.drawAreaMode;
@@ -81,6 +83,7 @@ class MapRender {
     }
 
     findNearbyPoint(point) {
+        const { mapAreaList } = this._mapData;
         // 绘制中的起点需要有吸附功能
         if (this.areaPoint.length > 0) {
             var distance = Util.getDistance(point, this.areaPoint[0]);
@@ -89,8 +92,8 @@ class MapRender {
             }
         }
         // 已绘制完的区域的顶点需要有吸附功能
-        for (var i = 0; i < this.mapAreaList.length; i++) {
-            var mapArea = this.mapAreaList[i];
+        for (var i = 0; i < mapAreaList.length; i++) {
+            var mapArea = mapAreaList[i];
             for (var j = 0; j < mapArea.points.length; j++) {
                 var distance = Util.getDistance(mapArea.points[j], point);
                 if (distance <= 10) {
@@ -105,6 +108,7 @@ class MapRender {
         ctx.clearRect(0, 0, this._map.width, this._map.height);
         var mouseInArea = this.drawMapBoundary(ctx);
         this.drawMapArea(ctx);
+        this.drawMapSprite(ctx);
         this.drawPaintArea(ctx);
         if (mouseInArea) {
             this.drawCurPoint(ctx);
@@ -112,26 +116,33 @@ class MapRender {
         //console.timeEnd("mapRender");
     }
 
+    //绘制地图边界
     drawMapBoundary(ctx) {
         ctx.beginPath();
+        ctx.rect(0, 0, this._map.width, this._map.height);
+        var mouseInArea = ctx.isPointInPath(this._mapHandle.mouse.x, this._mapHandle.mouse.y);
         ctx.fillStyle = "white";
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(32, 144, 241,0.8)";
-        ctx.rect(0, 0, this._map.width, this._map.height);
-        var mouseInArea = ctx.isPointInPath(this._mapHandle.mouse.x, this._mapHandle.mouse.y);
-        ctx.closePath();
         ctx.fill();
         ctx.stroke();
         return mouseInArea;
     }
 
-
+    //绘制区域
     drawMapArea(ctx) {
-        var context = this;
-        this.mapAreaList.forEach((mapArea) => {
+        const { mapAreaList } = this._mapData;
+        mapAreaList.forEach((mapArea) => {
             mapArea.draw(ctx);
         })
     }
+    drawMapSprite(ctx) {
+        var context = this;
+        // this.mapAreaList.forEach((mapArea) => {
+        //     mapArea.draw(ctx);
+        // })
+    }
+
 
     drawPaintArea(ctx) {
         if (!this.drawAreaMode) {
@@ -174,6 +185,7 @@ class MapRender {
             //ctx.closePath();
         }
     }
+
     drawCurPoint(ctx) {
         ctx.save();
         ctx.font = "12px Arial";
@@ -189,7 +201,7 @@ class MapRender {
         ctx.fillStyle = "rgb(32, 144, 241)";
         ctx.closePath();
         ctx.fill();
-        
+
         ctx.restore();
     }
 
