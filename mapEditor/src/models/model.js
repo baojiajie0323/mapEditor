@@ -4,7 +4,8 @@ export default {
   namespace: 'mapeditor',
 
   state: {
-    drawMode: ""
+    drawMode: "",
+    dataModalShow: false,
   },
 
   subscriptions: {
@@ -24,6 +25,9 @@ export default {
     },
     setDrawMode(state, { payload: drawMode }) {
       return { ...state, drawMode };
+    },
+    setDataModalShow(state, { payload: dataModalShow }) {
+      return { ...state, dataModalShow };
     },
   },
 

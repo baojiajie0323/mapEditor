@@ -1,4 +1,4 @@
-.map{
+.map {
     position: absolute;
     left: 360px;
     right: 20px;
@@ -6,10 +6,33 @@
     bottom: 20px;
 }
 
-.mapview{
+.mapview {
     position: absolute;
     left: 20px;
     right: 20px;
     top: 20px;
-    bottom: 20px; 
+    bottom: 20px;
+}
+
+.dataModal {
+    width: 900px !important;
+    max-width: 900px !important;
+    .content {
+        position: relative;
+        max-height: 500px;
+        height: 500px;
+        .mapLayer {
+            width: 250px;
+            height: 100%;
+            margin-right: 50px;
+            position: relative;
+            .layerList {
+                position: absolute;
+                width: 100%;
+                top: 45px;
+                bottom: 0;
+                overflow-y: auto;
+            }
+        }
+    }
 }

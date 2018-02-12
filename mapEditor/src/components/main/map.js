@@ -6,6 +6,7 @@ import Paper from 'material-ui/Paper';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import Divider from 'material-ui/Divider';
+import DataModal from './dataModal';
 import styles from './map.less'
 
 class Map extends React.Component {
@@ -28,8 +29,8 @@ class Map extends React.Component {
         this.mapCanvas.width = mapWidth;
         this.mapCanvas.height = mapHeight;
 
-        MapData.instance().init();
-        this.mapRender = new MapRender(this.mapCanvas);
+        this.mapData = MapData.instance().init();
+        this.mapRender = new MapRender(this.mapCanvas, this.mapData);
         this.mapRender.contextmenucb = this.onContextMenu;
         console.log("componentDidMount", mapWidth, mapHeight);
 
@@ -97,6 +98,7 @@ class Map extends React.Component {
                         })}
                     </Menu>
                 </Paper> : null}
+                <DataModal />
             </div>
         )
     }

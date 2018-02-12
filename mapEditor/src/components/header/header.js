@@ -17,6 +17,9 @@ import ThemeIcon from 'material-ui/svg-icons/image/color-lens';
 import { grey800 } from 'material-ui/styles/colors';
 
 const Header = ({ dispatch }) => {
+  var onClickData = () => {
+    dispatch({ type: 'mapeditor/setDataModalShow', payload: true })
+  }
   return (
     <header className={styles.header}>
       <p>科达云地图编辑器</p>
@@ -42,13 +45,14 @@ const Header = ({ dispatch }) => {
         className={styles.headerbtn}
       />
       <RaisedButton
+        onClick={onClickData}
         label="查看数据表"
         icon={<ListIcon color={grey800} />}
         className={styles.headerbtn}
       />
       <IconButton style={{ marginLeft: '100px' }} tooltip="帮助">
         <HelpIcon color={grey800} />
-      </IconButton>      
+      </IconButton>
       <div className={styles.logo}></div>
     </header>
   );
@@ -60,7 +64,7 @@ Header.propTypes = {
 function MapToStates(state) {
   //const { } = state.mapEditor;
   return {
-    
+
   }
 }
 export default connect(MapToStates)(Header);

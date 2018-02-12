@@ -9,7 +9,7 @@ class MapRender {
         this._mapHandle = null;
         this.contextmenucb = null;
         this.showMousePoint = true;
-
+        this._mapData = MapData.instance();
         this.drawAreaMode = "";
         this.areaPoint = [];
 
@@ -17,7 +17,6 @@ class MapRender {
     }
     init() {
         this.initHandle();
-        this.initData();
         this.draw();
     }
     initHandle() {
@@ -26,9 +25,7 @@ class MapRender {
         this._mapHandle.addListener("mousedown", this.onMouseDown.bind(this));
         this._mapHandle.addListener("mouseleave", this.onMouseLeave.bind(this));
     }
-    initData() {
-        this._mapData = new MapData();
-    }
+
     addMapArea(type, points) {
         var mapArea = new MapArea(this, type, points);
         this._mapData.addArea(mapArea);
@@ -83,7 +80,7 @@ class MapRender {
     }
 
     findNearbyPoint(point) {
-        const { mapAreaList } = this._mapData;
+        const mapAreaList = this._mapData.getAreaList();
         // 绘制中的起点需要有吸附功能
         if (this.areaPoint.length > 0) {
             var distance = Util.getDistance(point, this.areaPoint[0]);
@@ -131,7 +128,7 @@ class MapRender {
 
     //绘制区域
     drawMapArea(ctx) {
-        const { mapAreaList } = this._mapData;
+        const mapAreaList = this._mapData.getAreaList();
         mapAreaList.forEach((mapArea) => {
             mapArea.draw(ctx);
         })

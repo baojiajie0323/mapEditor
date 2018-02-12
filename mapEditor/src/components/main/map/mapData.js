@@ -1,25 +1,40 @@
-//数据格式：
-data: [{
-    layer: {
-        name: 'test',
-        area: [{
-
-        }],
-        sprite: [{
-
-        }]
-    }
-}]
+var mapJson = require('./map.json');
 
 class MapData {
     constructor() {
-        this.curMapName = "test";
-        this.mapAreaList = [];
+        //this.init();
+    }
+    static instance() {
+        if (!MapData._instance) {
+            MapData._instance = new MapData();
+        }
+        return MapData._instance;
     }
     init() {
+        this.curMapName = "test";
+        this.data = mapJson;
+        console.log('MapData init', mapJson);
+    }
+    getCurMapData() {
+        for (var i = 0; i < this.data.length; i++) {
+            if (this.data[i].name == this.curMapName) {
+                return this.data[i];
+            }
+        }
     }
     addArea(mapArea) {
-        this.mapAreaList.push(mapArea);
+        var mapData = this.getCurMapData();
+        if (!mapData) {
+            return;
+        }
+        mapData.area.push(mapArea);
+    }
+    getAreaList() {
+        var mapData = this.getCurMapData();
+        if (!mapData) {
+            return;
+        }
+        return mapData.area;
     }
 
 }
