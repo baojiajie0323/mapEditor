@@ -27,9 +27,28 @@ class DataModal extends React.Component {
     handleClose = () => {
         this.props.dispatch({ type: 'mapeditor/setDataModalShow', payload: false })
     };
-
+    renderMapData() {
+        var mapData = MapData.instance().getJsonData();
+        if (!mapData) return null;
+        console.log("MapData", mapData);
+        return mapData.map((m) => {
+            return (
+                <div>
+                    <p>{m.name}</p>
+                    <Subheader>区域</Subheader>
+                    {m.area.map((a,i)=> {
+                        return <p className={styles.dataString}>{JSON.stringify(a)}</p>
+                    })}
+                    
+                    <Subheader>图元</Subheader>
+                    <p className={styles.dataString}>{JSON.stringify(m.sprite)}</p>
+                </div>
+            )
+        })
+    }
     render() {
         var { dataModalShow } = this.props;
+
         // const actions = [
         //     <FlatButton
         //         label="Cancel"
@@ -43,7 +62,6 @@ class DataModal extends React.Component {
         //         onClick={this.handleClose}
         //     />,
         // ];
-        console.log("MapData", MapData.instance().data);
         //var mapDataJson = JSON.stringify(MapData.instance().data);
         var mapDataJson = "";
         return <Dialog
@@ -56,46 +74,7 @@ class DataModal extends React.Component {
             bodyClassName={styles.content}
         >
             <div className={styles.mapLayer}>
-                <Subheader>地图图层</Subheader>
-                <div className={styles.layerList}>
-                    <List>
-                        <ListItem primaryText="Sent mail" leftIcon={<ContentSend />} />
-                        <ListItem primaryText="Drafts" leftIcon={<ContentDrafts />} />
-                        <ListItem
-                            primaryText="Inbox"
-                            leftIcon={<ContentInbox />}
-                            initiallyOpen={true}
-                            primaryTogglesNestedList={true}
-                            nestedItems={[
-                                <ListItem
-                                    key={1}
-                                    primaryText="Starred"
-                                    leftIcon={<ActionGrade />}
-                                />,
-                                <ListItem
-                                    key={2}
-                                    primaryText="Sent Mail"
-                                    leftIcon={<ContentSend />}
-                                    disabled={true}
-                                    nestedItems={[
-                                        <ListItem key={1} primaryText="Drafts" leftIcon={<ContentDrafts />} />,
-                                    ]}
-                                />,
-                                <ListItem
-                                    key={3}
-                                    primaryText="Inbox"
-                                    leftIcon={<ContentInbox />}
-                                    open={this.state.open}
-                                    onNestedListToggle={this.handleNestedListToggle}
-                                    nestedItems={[
-                                        <ListItem key={1} primaryText="Drafts" leftIcon={<ContentDrafts />} />,
-                                    ]}
-                                />,
-                            ]}
-                        />
-                    </List>
-                </div>
-
+                {this.renderMapData()}
             </div>
 
         </Dialog>

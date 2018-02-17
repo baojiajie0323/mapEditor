@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
 import MapRender from './mapRender';
-import MapData from './mapData';
 import Paper from 'material-ui/Paper';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
@@ -28,7 +27,6 @@ class Map extends React.Component {
         this.mapCanvas.width = mapWidth;
         this.mapCanvas.height = mapHeight;
 
-        MapData.instance().init();
         this.mapRender = new MapRender(this.mapCanvas);
         this.mapRender.contextmenucb = this.onContextMenu;
         console.log("componentDidMount", mapWidth, mapHeight);
