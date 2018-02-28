@@ -9,7 +9,7 @@ class MapUtil {
         } else if (p2.y < p1.y) {
             angle += 2 * Math.PI;
         }
-        return  angle * 360 / (2 * Math.PI);
+        return angle * 360 / (2 * Math.PI);
     }
     static getCenterPoint(points, type) {
         if (type == "polygon") {
@@ -23,7 +23,7 @@ class MapUtil {
             return { x: x1 + (x2 - x1) / 2, y: y1 + (y2 - y1) / 2 }
         }
         else {
-            return Object.assign({},points[0]);
+            return Object.assign({}, points[0]);
         }
     }
 }

@@ -1,5 +1,6 @@
 var mapJson = require('./map.json');
 import mapArea from './mapArea';
+import util from './util';
 //import mapSprite from './mapSprite';
 
 class MapData {
@@ -18,13 +19,12 @@ class MapData {
     }
     init() {
         this.curMapName = "test";
-        this.dataJson = mapJson;
         this.initData();
-        console.log('MapData init', mapJson);
     }
     initData() {
+        console.log('MapData init', mapJson);
         var context = this;
-        this.data = this.dataJson.map((d) => {
+        this.data = mapJson.map((d) => {
             d.area = d.area.map((a) => {
                 return new mapArea(context._mapRender, a.type, a.points, a.text);
             })
@@ -34,14 +34,18 @@ class MapData {
     getJsonData() {
         var context = this;
         if(!this.data) return;
-        this.dataJson = this.data.map((d) => {
-            var areajson = 
-            d.area = d.area.map((a) => {
-                return { points: a.points, text: a.text, type: a.type }
+        var dataJson =  [];
+        this.data.forEach((d) => {
+            var layer = {};
+            layer.area = [];
+            layer.name = d.name;
+            d.area.forEach((a) => {
+                layer.area.push({ points: a.points, text: a.text, type: a.type })
             })
-            return d;
+            dataJson.push(layer);
         })
-        return this.dataJson;
+        console.log('getJsonData',dataJson);
+        return dataJson;
     }
     getCurMapData() {
         for (var i = 0; i < this.data.length; i++) {
