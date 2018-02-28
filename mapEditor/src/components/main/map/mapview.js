@@ -19,7 +19,15 @@ class MapView extends React.Component {
         this.mapCanvas.width = mapWidth;
         this.mapCanvas.height = mapHeight;
 
+        this.initStats();
         this.initThree();
+    }
+    initStats() {
+        var stats = new Stats();
+        stats.setMode(0);
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0';
+        stats.domElement.style.top = '0';
     }
     initThree() {
         console.log("initThree");
@@ -35,7 +43,6 @@ class MapView extends React.Component {
         this.addGround();
         //this.addArea();
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.animate();
     }
     initCamera() {
         //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
@@ -73,7 +80,7 @@ class MapView extends React.Component {
         //area.setPosition
         this.scene.add(area);
     }
-    animate() {
+    animate = () => {
         requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
         //stats.update();
@@ -85,6 +92,7 @@ class MapView extends React.Component {
     render() {
         return <div ref={(c) => { this.mapContainer = c }} className={styles.mapview}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapView" ></canvas>
+            <div id="Stat-output"></div>
         </div>
     }
 }

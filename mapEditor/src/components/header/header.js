@@ -20,10 +20,14 @@ const Header = ({ dispatch }) => {
   var onClickData = () => {
     dispatch({ type: 'mapeditor/setDataModalShow', payload: true })
   }
+  var onClickMapview = () => {
+    dispatch({ type: 'mapeditor/setMapview', payload: true })
+  }
   return (
     <header className={styles.header}>
       <p>科达云地图编辑器</p>
       <RaisedButton
+        onClick={onClickMapview}
         label="预览地图"
         icon={<PreviewIcon color={grey800} />}
         className={styles.headerbtn}

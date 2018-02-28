@@ -5,12 +5,14 @@ import Map from './map/map';
 import MapView from './map/mapview';
 import styles from './main.less';
 
-const Main = ({ dispatch }) => {
+const Main = ({ dispatch, showMapView }) => {
   return (
     <div className={styles.main}>
-      <EditorPanel />
-      <Map />
-      {/* <MapView /> */}
+      {showMapView ?
+        <MapView /> :
+        [<EditorPanel />,
+        <Map />]
+      }
     </div>
   );
 };
@@ -19,9 +21,9 @@ Main.propTypes = {
 };
 
 function MapToStates(state) {
-  //const { } = state.mapEditor;
+  const { showMapView } = state.mapeditor;
   return {
-
+    showMapView
   }
 }
 export default connect(MapToStates)(Main);

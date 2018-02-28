@@ -6,6 +6,7 @@ export default {
   state: {
     drawMode: "",
     dataModalShow: false,
+    showMapView: false,
   },
 
   subscriptions: {
@@ -28,6 +29,9 @@ export default {
     },
     setDataModalShow(state, { payload: dataModalShow }) {
       return { ...state, dataModalShow };
+    },
+    setMapview(state, { payload: showMapView }) {
+      return { ...state, showMapView: !state.showMapView };
     },
   },
 
