@@ -16,7 +16,7 @@ import ThemeIcon from 'material-ui/svg-icons/image/color-lens';
 
 import { grey800 } from 'material-ui/styles/colors';
 
-const Header = ({ dispatch }) => {
+const Header = ({ dispatch, showMapView }) => {
   var onClickData = () => {
     dispatch({ type: 'mapeditor/setDataModalShow', payload: true })
   }
@@ -28,7 +28,7 @@ const Header = ({ dispatch }) => {
       <p>科达云地图编辑器</p>
       <RaisedButton
         onClick={onClickMapview}
-        label="预览地图"
+        label={showMapView ? "编辑地图" : '预览地图'}
         icon={<PreviewIcon color={grey800} />}
         className={styles.headerbtn}
       />
@@ -66,9 +66,9 @@ Header.propTypes = {
 };
 
 function MapToStates(state) {
-  //const { } = state.mapEditor;
+  const { showMapView } = state.mapeditor;
   return {
-
+    showMapView
   }
 }
 export default connect(MapToStates)(Header);

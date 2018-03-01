@@ -1,5 +1,5 @@
 var mapJson = require('./map.json');
-import mapArea from './mapArea';
+import MapArea from './mapArea';
 import util from './util';
 //import mapSprite from './mapSprite';
 
@@ -26,7 +26,7 @@ class MapData {
         var context = this;
         this.data = mapJson.map((d) => {
             d.area = d.area.map((a) => {
-                return new mapArea(context._mapRender, a.type, a.points, a.text);
+                return new MapArea(context._mapRender, a.type, a.points, a.text);
             })
             return d;
         })
@@ -59,7 +59,7 @@ class MapData {
         if (!mapData) {
             return;
         }
-        var mapArea = new MapArea(this, type, points);
+        var mapArea = new MapArea(this._mapRender, type, points);
         mapData.area.push(mapArea);
     }
     getAreaList() {
