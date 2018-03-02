@@ -35,6 +35,13 @@ class MapView extends React.Component {
         this.initThree();
         this.animate();
     }
+    componentWillUnmount() {
+        if(this.requestID){
+            window.cancelAnimationFrame(this.requestID);
+        }
+        //document.body.removeChild(this.gui.domElement.parentNode);
+        this.gui
+    }
     initStats() {
         this.stats = new Stats();
         this.stats.setMode(0);
@@ -45,6 +52,7 @@ class MapView extends React.Component {
     }
     initGui() {
         this.gui = new dat.GUI();
+        
         this.gui.domElement.style.marginTop = '65px';
         this.gui.add(this.guicontrols, 'rotationSpeed', 0, 0.5);
         this.gui.add(this.guicontrols, 'bouncingSpeed', 0, 0.5);
@@ -112,8 +120,10 @@ class MapView extends React.Component {
 
         var mesh = new THREE.Mesh(geom,
             new THREE.MeshLambertMaterial({
-                color: 0x7777ff,
-                wrapAround: true
+                color: 0x2090F1,
+                wrapAround: true,
+                opacity: 0.3,
+                transparent: true,
             }))
 
         return mesh;
@@ -130,51 +140,46 @@ class MapView extends React.Component {
         const mapAreaList = MapData.instance().getAreaList();
         console.log('addarea', mapAreaList);
         mapAreaList.forEach((a) => {
+            var shape = new THREE.Shape();
+            var drawPoints = this.convertPoints(a.points);
             if (a.type == 'polygon') {
                 if (a.points.length <= 2) {
                     return;
                 }
-                var shape = new THREE.Shape();
-                var drawPoints = this.convertPoints(a.points);
                 shape.moveTo(drawPoints[0].x, drawPoints[0].y);
                 for (var i = 1; i < drawPoints.length; i++) {
                     shape.lineTo(drawPoints[i].x, drawPoints[i].y);
                 }
                 shape.lineTo(drawPoints[0].x, drawPoints[0].y);
-
-                var options = {
-                    amount: Math.random() * 50 + 10,
-                    bevelEnabled: false,
-                };
-                var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
-                areaMesh.position.z = this.ground.z;
-                this.scene.add(areaMesh);
             } else if (a.type == 'circle') {
                 if (a.points.length != 2) {
                     return;
                 }
                 var shape = new THREE.Shape();
                 var drawPoints = this.convertPoints(a.points);
-                //shape.moveTo(drawPoints[0].x, drawPoints[0].y);
-                // for (var i = 1; i < drawPoints.length; i++) {
-                //     shape.lineTo(drawPoints[i].x, drawPoints[i].y);
-                // }
                 shape.absarc(
-                    drawPoints[0].x, 
-                    drawPoints[0].y, 
-                    util.getDistance(drawPoints[0],drawPoints[1]),
+                    drawPoints[0].x,
+                    drawPoints[0].y,
+                    util.getDistance(drawPoints[0], drawPoints[1]),
                     0,
-                    Math.PI *2,
+                    Math.PI * 2,
                     true
                 );
-                var options = {
-                    amount: Math.random() * 50 + 10,
-                    bevelEnabled: false,
-                };
-                var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
-                areaMesh.position.z = this.ground.z;
-                this.scene.add(areaMesh);
             }
+            var options = {
+                amount: Math.random() * 50 + 10,
+                bevelEnabled: false,
+            };
+            var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
+            areaMesh.position.z = this.ground.z;
+
+            var linemesh = new THREE.Line(shape.createPointsGeometry(10), new THREE.LineBasicMaterial({
+                color: 0x2090F1,
+                linewidth: 2
+            }));
+            linemesh.position.z = this.ground.z + options.amount;
+            this.scene.add(linemesh);
+            this.scene.add(areaMesh);
         })
         // mapAreaList.forEach((mapArea) => {
         //     mapArea.draw(ctx);
@@ -190,13 +195,12 @@ class MapView extends React.Component {
         //this.shape.position.set(0, 0, 500);
     }
     animate = () => {
+        console.log('animate');
         this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
-        // this.shape.rotation.y = step += 0.01;
-        requestAnimationFrame(this.animate);
+        this.requestID = requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
-        //stats.update();
     }
     updateControls() {
         this.controls.update();
