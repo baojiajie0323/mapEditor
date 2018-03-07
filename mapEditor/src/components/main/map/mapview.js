@@ -31,7 +31,7 @@ class MapView extends React.Component {
         this.mapCanvas.height = mapHeight;
 
         this.initStats();
-        this.initGui();
+        //this.initGui();
         this.initThree();
         this.animate();
     }
@@ -74,7 +74,7 @@ class MapView extends React.Component {
         this.addGround();
         this.addArea();
         // this.trackballControls = new THREE.TrackballControls(this.camera);
-        // this.trackballControls.rotateSpeed = 1.0;
+        // this.trackballControls.rotateSpeed = 0.3;
         // this.trackballControls.zoomSpeed = 1.0;
         // this.trackballControls.panSpeed = 1.0;
 
@@ -83,20 +83,20 @@ class MapView extends React.Component {
     initCamera() {
         //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 0.1, 10000);
-        this.camera.position.set(0, -500, 1200);
+        this.camera.position.set(0, 1200, 500);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
     }
     initLight() {
         this.ambientLight = new THREE.AmbientLight(this.guicontrols.ambiColor);
         this.directLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        this.directLight.position.set(0, 0, 10000);
+        this.directLight.position.set(0, 10000, 3000);
 
-        this.scene.add(this.ambientLight); //环境光
+        this.scene.add(this.ambientLight); //环境光 
         this.scene.add(this.directLight);  //方向光
     }
     addGround() {
-        var ground = new THREE.Mesh(new THREE.CubeGeometry(this.ground.x, this.ground.y, this.ground.z),
+        var groundMesh = new THREE.Mesh(new THREE.CubeGeometry(this.ground.x, this.ground.y, this.ground.z),
             new THREE.MeshLambertMaterial({
                 color: 0xf1f6f7,
                 ambient: 0x858685,
@@ -104,7 +104,8 @@ class MapView extends React.Component {
                 //wireframe: true
             })
         );
-        this.scene.add(ground);
+        groundMesh.rotation.x = - Math.PI / 2;
+        this.scene.add(groundMesh);
     }
     createMesh(geom) {
         // assign two materials
@@ -179,23 +180,25 @@ class MapView extends React.Component {
                 bevelEnabled: false,
             };
             var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
-            areaMesh.position.z = this.ground.z;
+            areaMesh.position.y = this.ground.z;
+            areaMesh.rotation.x = - Math.PI / 2;
 
             var linemesh = new THREE.Line(shape.createPointsGeometry(10), new THREE.LineBasicMaterial({
                 color: 0x2090F1,
                 linewidth: 2
             }));
-            linemesh.position.z = this.ground.z + options.amount;
+            linemesh.position.y = this.ground.z + options.amount;
+            linemesh.rotation.x = - Math.PI / 2;
 
             var textmesh = this.createSpriteText("一监区");
             textmesh.position.x = centerpoint.x;
-            textmesh.position.y = centerpoint.y;
-            textmesh.position.z = this.ground.z + options.amount + 40;
+            textmesh.position.y = this.ground.z + options.amount + 40;
+            textmesh.position.z = - centerpoint.y;
             //textmesh.position.z = 98;
             console.log(textmesh);
             this.scene.add(linemesh);
             this.scene.add(areaMesh);
-            this.scene.add(textmesh);
+            this.scene.add(textmesh); 
         })
         // mapAreaList.forEach((mapArea) => {
         //     mapArea.draw(ctx);
@@ -219,7 +222,7 @@ class MapView extends React.Component {
         // ctx.fillStyle = "#f00";
         // ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.fillStyle = "#333";
-        ctx.font = "80px 微软雅黑";
+        ctx.font = "bold 80px 微软雅黑";
         ctx.lineWidth = 4;
         ctx.textAlign = "center"
         ctx.fillText(text, 500, 250);
@@ -240,6 +243,7 @@ class MapView extends React.Component {
         this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
+        //this.trackballControls.update(delta);
         this.requestID = requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
     }
