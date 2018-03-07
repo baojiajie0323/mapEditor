@@ -36,7 +36,7 @@ class MapView extends React.Component {
         this.animate();
     }
     componentWillUnmount() {
-        if(this.requestID){
+        if (this.requestID) {
             window.cancelAnimationFrame(this.requestID);
         }
         //document.body.removeChild(this.gui.domElement.parentNode);
@@ -52,7 +52,7 @@ class MapView extends React.Component {
     }
     initGui() {
         this.gui = new dat.GUI();
-        
+
         this.gui.domElement.style.marginTop = '65px';
         this.gui.add(this.guicontrols, 'rotationSpeed', 0, 0.5);
         this.gui.add(this.guicontrols, 'bouncingSpeed', 0, 0.5);
@@ -83,7 +83,7 @@ class MapView extends React.Component {
     initCamera() {
         //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 0.1, 10000);
-        this.camera.position.set(0, 0, 1200);
+        this.camera.position.set(0, -500, 1200);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
     }
@@ -136,12 +136,19 @@ class MapView extends React.Component {
             }
         })
     }
+    convertPoint(p) {
+        return {
+            x: - this.ground.x / 2 + p.x,
+            y: this.ground.y / 2 - p.y
+        }
+    }
     addArea() {
         const mapAreaList = MapData.instance().getAreaList();
         console.log('addarea', mapAreaList);
         mapAreaList.forEach((a) => {
             var shape = new THREE.Shape();
             var drawPoints = this.convertPoints(a.points);
+            var centerpoint = this.convertPoint(a.centerpoint);
             if (a.type == 'polygon') {
                 if (a.points.length <= 2) {
                     return;
@@ -168,6 +175,7 @@ class MapView extends React.Component {
             }
             var options = {
                 amount: Math.random() * 50 + 10,
+                //amount: 1,
                 bevelEnabled: false,
             };
             var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
@@ -178,8 +186,16 @@ class MapView extends React.Component {
                 linewidth: 2
             }));
             linemesh.position.z = this.ground.z + options.amount;
+
+            var textmesh = this.createSpriteText("一监区");
+            textmesh.position.x = centerpoint.x;
+            textmesh.position.y = centerpoint.y;
+            textmesh.position.z = this.ground.z + options.amount + 40;
+            //textmesh.position.z = 98;
+            console.log(textmesh);
             this.scene.add(linemesh);
             this.scene.add(areaMesh);
+            this.scene.add(textmesh);
         })
         // mapAreaList.forEach((mapArea) => {
         //     mapArea.draw(ctx);
@@ -194,8 +210,33 @@ class MapView extends React.Component {
         //area.setPosition
         //this.shape.position.set(0, 0, 500);
     }
+    createSpriteText(text) {
+        //先用画布将文字画出
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+        canvas.width = 1000;
+        canvas.height = 500;
+        // ctx.fillStyle = "#f00";
+        // ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#333";
+        ctx.font = "80px 微软雅黑";
+        ctx.lineWidth = 4;
+        ctx.textAlign = "center"
+        ctx.fillText(text, 500, 250);
+        //console.log('canvas:',canvas.width,canvas.height);
+        // ctx.strokeStyle = "#fff";
+        // ctx.strokeText(text, 500, 250);
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        //使用Sprite显示文字
+        let material = new THREE.SpriteMaterial({ map: texture });
+        let textObj = new THREE.Sprite(material);
+        textObj.scale.set(200,100, 1);
+        //textObj.position.set(0, 0, 98);
+        return textObj;
+    }
     animate = () => {
-        console.log('animate');
         this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
