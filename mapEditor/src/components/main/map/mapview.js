@@ -9,6 +9,7 @@ class MapView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            viewMode: '3D',
         }
         this.mapContainer = null;
         this.mapCanvas = null;
@@ -47,6 +48,14 @@ class MapView extends React.Component {
         //document.body.removeChild(this.gui.domElement.parentNode);
         //this.gui
     }
+    onClick2D = (e) => {
+        e.stopPropagation();
+        this.setState({ viewMode: '2D' })
+    }
+    onClick3D = (e) => {
+        e.stopPropagation();
+        this.setState({ viewMode: '3D' })
+    }
     onMouseClick = (event) => {
         console.log('onMouseUp');
         event.preventDefault();
@@ -69,8 +78,8 @@ class MapView extends React.Component {
                 this.INTERSECTED = arealist[0].object;
                 this.INTERSECTED.currentHex = this.INTERSECTED.material.emissive.getHex();
                 this.INTERSECTED.material.emissive.setHex(0xde4f18);
-                new TWEEN.Tween( this.INTERSECTED.material).to( {opacity: 0.1} , 300 )
-                .easing( TWEEN.Easing.Linear.None).yoyo(true).repeat(1).start();
+                new TWEEN.Tween(this.INTERSECTED.material).to({ opacity: 0.1 }, 300)
+                    .easing(TWEEN.Easing.Linear.None).yoyo(true).repeat(1).start();
             }
         } else {
             if (this.INTERSECTED) this.INTERSECTED.material.emissive.setHex(this.INTERSECTED.currentHex);
@@ -92,13 +101,13 @@ class MapView extends React.Component {
         this.gui.add(this.guicontrols, 'rotationSpeed', 0, 0.5);
         this.gui.add(this.guicontrols, 'bouncingSpeed', 0, 0.5);
         this.gui.addColor(this.guicontrols, 'areaAmbient').onChange((e) => {
-           console.log(this.areaMaterial);
-           this.areaMaterial.color = new THREE.Color(e);
+            console.log(this.areaMaterial);
+            this.areaMaterial.color = new THREE.Color(e);
         });
         this.gui.addColor(this.guicontrols, 'areaEmissive').onChange((e) => {
             console.log(this.areaMaterial);
             this.areaMaterial.emissive = new THREE.Color(e);
-         });
+        });
         this.gui.addColor(this.guicontrols, 'ambiColor').onChange((e) => {
             this.ambientLight.color = new THREE.Color(e);
         });
@@ -122,14 +131,15 @@ class MapView extends React.Component {
         // this.trackballControls.panSpeed = 1.0;
 
         this.orbitControls = new THREE.OrbitControls(this.camera);
-
+        this.orbitControls.mouseButtons = {ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.LEFT}
+        this.orbitControls.maxPolarAngle = Math.PI / 4;
         this.raycaster = new THREE.Raycaster();
 
     }
     initCamera() {
         //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 0.1, 10000);
-        this.camera.position.set(0, 1200, 500);
+        this.camera.position.set(0, 1000, 1000);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
     }
@@ -175,7 +185,7 @@ class MapView extends React.Component {
         // }
 
 
-        var mesh = new THREE.Mesh(geom,new THREE.MeshLambertMaterial({
+        var mesh = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({
             color: 0x333333,
             emissive: 0x7eb0f7,
             wrapAround: true,
@@ -298,7 +308,7 @@ class MapView extends React.Component {
         return textObj;
     }
     animate = () => {
-		TWEEN.update();
+        TWEEN.update();
         this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
@@ -314,6 +324,10 @@ class MapView extends React.Component {
         return <div ref={(c) => { this.mapContainer = c }} className={styles.mapview}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapView" ></canvas>
             <div ref={(c) => { this.statdom = c }}></div>
+            <div className={styles.viewMode}>
+                <div className={this.state.viewMode == "2D" ? styles.checked : ''} onClick={this.onClick2D}>2D</div>
+                <div className={this.state.viewMode == "3D" ? styles.checked : ''} onClick={this.onClick3D}>3D</div>
+            </div>
         </div>
     }
 }
