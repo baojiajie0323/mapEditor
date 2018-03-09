@@ -25,6 +25,7 @@ class MapView extends React.Component {
             y: 858,
             z: 10
         }
+        this.areas = [];
         this.clock = new THREE.Clock();
         this.onMouseClick = this.onMouseClick.bind(this);
     }
@@ -50,26 +51,29 @@ class MapView extends React.Component {
     }
     onClick2D = (e) => {
         e.stopPropagation();
-        this.setState({ viewMode: '2D' })
-        //this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-        //new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
-        //     .easing(TWEEN.Easing.Linear.None).start();
-        // this.camera.position.x = 0;
-        // this.camera.position.y = 1000;
-        // this.camera.position.z = 1000;
+        if (this.state.viewMode == '2D') {
+            return;
+        }
+        this.setState({ viewMode: '2D' }, this.initArea)
         this.orbitControls.reset();
         this.orbitControls.maxPolarAngle = 0;
+
+        this.initArea();
     }
     onClick3D = (e) => {
         e.stopPropagation();
-        this.setState({ viewMode: '3D' })
+        if (this.state.viewMode == '3D') {
+            return;
+        }
+        this.setState({ viewMode: '3D' }, this.initArea);
         // new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
         //     .easing(TWEEN.Easing.Linear.None).start();
         // this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.orbitControls.reset();
         this.orbitControls.maxPolarAngle = Math.PI / 4;
-        new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
+        new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 300)
             .easing(TWEEN.Easing.Linear.None).start();
+
     }
     onMouseClick = (event) => {
         console.log('onMouseUp');
@@ -139,7 +143,7 @@ class MapView extends React.Component {
         this.initCamera();
         this.initLight();
         this.addGround();
-        this.addArea();
+        this.initArea();
         // this.trackballControls = new THREE.TrackballControls(this.camera);
         // this.trackballControls.rotateSpeed = 0.3;
         // this.trackballControls.zoomSpeed = 1.0;
@@ -225,7 +229,13 @@ class MapView extends React.Component {
             y: this.ground.y / 2 - p.y
         }
     }
-    addArea() {
+    initArea() {
+        if (this.areas.length > 0) {
+            this.areas.forEach((a) => {
+                this.scene.remove(a);
+            })
+            this.areas.length = 0;
+        }
         const mapAreaList = MapData.instance().getAreaList();
         console.log('addarea', mapAreaList);
         mapAreaList.forEach((a, index) => {
@@ -257,7 +267,7 @@ class MapView extends React.Component {
                 );
             }
             var options = {
-                amount: Math.random() * 50 + 10,
+                amount: this.state.viewMode == "3D" ? Math.random() * 50 + 10 : 1,
                 //amount: 1,
                 bevelEnabled: false,
             };
@@ -282,6 +292,10 @@ class MapView extends React.Component {
             this.scene.add(linemesh);
             this.scene.add(areaMesh);
             this.scene.add(textmesh);
+            this.areas.push(linemesh);
+            this.areas.push(areaMesh);
+            this.areas.push(textmesh);
+
         })
         // mapAreaList.forEach((mapArea) => {
         //     mapArea.draw(ctx);
