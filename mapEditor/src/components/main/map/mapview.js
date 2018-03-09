@@ -51,10 +51,25 @@ class MapView extends React.Component {
     onClick2D = (e) => {
         e.stopPropagation();
         this.setState({ viewMode: '2D' })
+        //this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        //new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
+        //     .easing(TWEEN.Easing.Linear.None).start();
+        // this.camera.position.x = 0;
+        // this.camera.position.y = 1000;
+        // this.camera.position.z = 1000;
+        this.orbitControls.reset();
+        this.orbitControls.maxPolarAngle = 0;
     }
     onClick3D = (e) => {
         e.stopPropagation();
         this.setState({ viewMode: '3D' })
+        // new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
+        //     .easing(TWEEN.Easing.Linear.None).start();
+        // this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.orbitControls.reset();
+        this.orbitControls.maxPolarAngle = Math.PI / 4;
+        new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
+            .easing(TWEEN.Easing.Linear.None).start();
     }
     onMouseClick = (event) => {
         console.log('onMouseUp');
@@ -131,7 +146,7 @@ class MapView extends React.Component {
         // this.trackballControls.panSpeed = 1.0;
 
         this.orbitControls = new THREE.OrbitControls(this.camera);
-        this.orbitControls.mouseButtons = {ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.LEFT}
+        this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.LEFT }
         this.orbitControls.maxPolarAngle = Math.PI / 4;
         this.raycaster = new THREE.Raycaster();
 
@@ -315,6 +330,7 @@ class MapView extends React.Component {
         //this.trackballControls.update(delta);
         this.requestID = requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
+        //console.log(this.camera)
     }
     updateControls() {
         this.controls.update();
