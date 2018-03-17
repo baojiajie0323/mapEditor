@@ -5,13 +5,19 @@
     top: 20px;
     bottom: 20px;
     background-color: white;
-    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);
-    //border-radius: 5px 5px 0 0;
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2); //border-radius: 5px 5px 0 0;
     overflow: hidden;
     .paint {
         position: absolute;
         width: 100%;
         height: 100%;
+        .form {
+            display: flex;
+            >span {
+                width: 82px;
+                line-height: 48px;
+            }
+        }
         .title {
             background-position: 0 center;
             background-repeat: no-repeat;
@@ -56,8 +62,7 @@
         .typerect_sel {
             background: url("../../assets/绘制矩形_sel.png") no-repeat center;
             background-size: 70%;
-            background-color: #2090F1;
-           // border: 1px solid #2090F1;
+            background-color: #2090F1; // border: 1px solid #2090F1;
         }
         .typecircle {
             height: 32px;
@@ -73,8 +78,7 @@
         .typecircle_sel {
             background: url("../../assets/绘制圆形_sel.png") no-repeat center;
             background-size: 70%;
-            background-color: #2090F1;
-           // border: 1px solid #2090F1;
+            background-color: #2090F1; // border: 1px solid #2090F1;
         }
         .typepolygon {
             height: 32px;
@@ -90,8 +94,7 @@
         .typepolygon_sel {
             background: url("../../assets/绘制多边形_sel.png") no-repeat center;
             background-size: 70%;
-            background-color: #2090F1;
-           // border: 1px solid #2090F1;
+            background-color: #2090F1; // border: 1px solid #2090F1;
         }
     }
 }

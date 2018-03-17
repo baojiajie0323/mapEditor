@@ -7,6 +7,7 @@ export default {
     drawMode: "",
     dataModalShow: false,
     showMapView: false,
+    selectedArea: '',
   },
 
   subscriptions: {
@@ -33,6 +34,9 @@ export default {
     setMapview(state, { payload: showMapView }) {
       return { ...state, showMapView: !state.showMapView };
     },
+    selectedArea(state, { payload: selectedArea }) {
+      return { ...state, selectedArea };
+    }
   },
 
 };

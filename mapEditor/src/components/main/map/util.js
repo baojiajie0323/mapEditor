@@ -1,3 +1,5 @@
+const uuidv1 = require('uuid/v1');
+
 class MapUtil {
     static getDistance(p1, p2) {
         return Math.pow((Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2)), 0.5);
@@ -25,6 +27,9 @@ class MapUtil {
         else {
             return Object.assign({}, points[0]);
         }
+    }
+    static getUUID(){
+        return uuidv1();
     }
 }
 

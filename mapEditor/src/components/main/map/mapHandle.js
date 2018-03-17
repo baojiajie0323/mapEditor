@@ -28,6 +28,7 @@ class MapHandle {
         })
     }
     onMouseDown(e) {
+        this._mapRender.dispatch({ type: 'mapeditor/selectedArea', payload: '' });
         this.dispatchEvent(e);
     }
     onMouseUp(e) {
@@ -38,7 +39,7 @@ class MapHandle {
         this.mouse = this._mapRender.findNearbyPoint(point) || point;
         this.dispatchEvent(e);
     }
-    onMouseLeave(e) {        
+    onMouseLeave(e) {
         this.mouse = { x: -1, y: -1 }
         this.dispatchEvent(e);
     }
