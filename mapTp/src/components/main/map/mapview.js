@@ -3,6 +3,10 @@ import { connect } from 'dva';
 import styles from './map.less'
 
 // var step = 0;
+var lineLightstep = 0;
+const lineStep = 300;
+const levelHeight = 600;
+
 class MapView extends React.Component {
     constructor(props) {
         super(props);
@@ -135,17 +139,17 @@ class MapView extends React.Component {
             canvas: this.mapCanvas,
             antialias: true
         });
-        this.renderer.setClearColor(0x0d3961);
+        this.renderer.setClearColor(0x1D1B36);
         this.scene = new THREE.Scene();
 
         this.initCamera();
         this.initLight();
         //this.addGround();
         //this.initArea();
-        this.testLine();
+        this.initTopo();
 
-        var axisHelper = new THREE.AxisHelper(500);
-        this.scene.add(axisHelper);
+        var axesHelper = new THREE.AxesHelper(500);
+        this.scene.add(axesHelper);
 
         // this.trackballControls = new THREE.TrackballControls(this.camera);
         // this.trackballControls.rotateSpeed = 0.3;
@@ -171,55 +175,165 @@ class MapView extends React.Component {
         this.directLight.position.set(0, 10000, 3000);
 
         this.scene.add(this.ambientLight); //环境光 
-        this.scene.add(this.directLight);  //方向光
+        //this.scene.add(this.directLight);  //方向光
     }
-    testLine() {
-        var mesh1 = new THREE.Mesh(new THREE.CubeGeometry(150, 130, 120),
+    addPlat(level) {
+        var mesh1 = new THREE.Mesh(new THREE.CubeGeometry(80, 100, 50),
             new THREE.MeshLambertMaterial({
                 color: 0xff0000,
-                //ambient: 0x858685,
                 emissive: 0x000000,
-                //wireframe: true
             })
         );
-        mesh1.position.x = 75;
-        mesh1.position.y = 65;
+        mesh1.position.x = 0;
+        mesh1.position.y = 600;
         mesh1.position.z = 0;
-
-        var mesh2 = new THREE.Mesh(new THREE.CubeGeometry(150, 130, 120),
+    }
+    initTopo() {
+        var nGap = 100;
+        var ROW_COUNT = 5;
+        var COLUMN_COUNT = 4;
+        var CUBE_X = 80;
+        var CUBE_Y = 100;
+        var CUBE_Z = 50;
+        var LINE_JOIN_HEIGHT = 300;
+        var point = new THREE.Vector3();
+        var mesh1 = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
             new THREE.MeshLambertMaterial({
-                color: 0xff3300,
-                //ambient: 0x858685,
+                color: 0xff0000,
                 emissive: 0x000000,
-                //wireframe: true
             })
         );
-        mesh2.position.x = 275;
-        mesh2.position.y = 365;
-        mesh2.position.z = 0;
+        mesh1.position.x = 0;
+        mesh1.position.y = 600 + CUBE_Y / 2;
+        mesh1.position.z = 0;
+        this.scene.add(mesh1);
 
-        //this.scene.add(mesh1);
-        //this.scene.add(mesh2);
-        var ARC_SEGMENTS = 200;
-        var geometry = new THREE.BufferGeometry();
-		geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( ARC_SEGMENTS * 3 ), 3 ) );
-        var curve = new THREE.CatmullRomCurve3( [
-            new THREE.Vector3(-10, 0, 10),
-            new THREE.Vector3(-5, 5, 5),
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(5, -5, 5),
-            new THREE.Vector3(10, 0, 10)
-        ] );
-        curve.curveType = 'catmullrom';
-        curve.mesh = new THREE.Line( geometry.clone(), new THREE.LineBasicMaterial( {
-            color: 0xff0000,
-            opacity: 0.35
-        } ) );
-        //curve.mesh.castShadow = true;
-        //splines.uniform = curve;
+        this.splineArray = [];
+        this.lightArray = [];
+        for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
+            for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
+                var mesh2 = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
+                    new THREE.MeshLambertMaterial({
+                        color: 0xff3300,
+                        //ambient: 0x858685,
+                        emissive: 0x000000,
+                    })
+                );
+                mesh2.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
+                mesh2.position.y = CUBE_Y / 2;
+                mesh2.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
+                this.scene.add(mesh2);
 
-        this.scene.add(curve.mesh);
+                var curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(0, 600, 0),
+                    new THREE.Vector3(0, 0 + CUBE_Y + LINE_JOIN_HEIGHT, 0),
+                    new THREE.Vector3(mesh2.position.x, 0 + CUBE_Y + LINE_JOIN_HEIGHT, mesh2.position.z),
+                    new THREE.Vector3(mesh2.position.x, 0 + CUBE_Y, mesh2.position.z),
+                ]);
+                curve.curveType = 'catmullrom';
+                curve.tension = 0.01;
+
+                var geometry = new THREE.BufferGeometry();
+                geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineStep * 3), 3));
+                var position = geometry.attributes.position;
+                for (var i = 0; i < lineStep; i++) {
+                    var t = i / (lineStep - 1);
+                    curve.getPoint(t, point);
+                    position.setXYZ(i, point.x, point.y, point.z);
+                }
+
+                var material = new THREE.LineBasicMaterial({ color: 0x327ABF, linewidth: 10 });
+                //Create the final Object3d to add to the scene
+                var splineObject = new THREE.Line(geometry, material);
+                this.scene.add(splineObject);
+
+                var sphere = new THREE.SphereBufferGeometry(4, 32, 32);
+                var testlight = new THREE.PointLight(0x00FF7F, 1, 100);
+                testlight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
+                this.scene.add(testlight);
+
+                this.splineArray.push(splineObject);
+                this.lightArray.push(testlight);
+            }
+        }
+
+        var geometry = new THREE.PlaneGeometry(
+            COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+            ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
+        );
+        var material = new THREE.MeshBasicMaterial({
+            color: 0x9370DB,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.4
+        });
+        var plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = - Math.PI / 2;
+        plane.position.y -= 2;
+
+        let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+        let edgesMtl = new THREE.LineBasicMaterial({ color: 0x8A2BE2 });
+        let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+        plane.add(cubeLine);
+
+
+        var geometry1 = new THREE.PlaneGeometry(
+            COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+            LINE_JOIN_HEIGHT
+        );
+        var geometry2 = new THREE.PlaneGeometry(
+            ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
+            LINE_JOIN_HEIGHT
+        );
+        var material_wall = new THREE.MeshBasicMaterial({
+            color: 0x9370DB,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: 0.25
+        });
+        var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
+        var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
+        var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
+        var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
+        plane_wall1.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
+        plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+
+        plane_wall2.rotation.y = Math.PI / 2;
+        plane_wall2.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
+        plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+
+        plane_wall3.rotation.y = Math.PI;
+        plane_wall3.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
+        plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+
+        plane_wall4.rotation.y = - Math.PI / 2;
+        plane_wall4.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
+        plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+
+
+        this.scene.add(plane);
+        this.scene.add(plane_wall1);
+        this.scene.add(plane_wall2);
+        this.scene.add(plane_wall3);
+        this.scene.add(plane_wall4);
+
     }
+    updateLineLight() {
+        for (var i = 0; i < this.splineArray.length; i++) {
+            var testlight = this.lightArray[i];
+            var spline = this.splineArray[i];
+            testlight.position.x = spline.geometry.attributes.position.array[lineLightstep * 3];
+            testlight.position.y = spline.geometry.attributes.position.array[lineLightstep * 3 + 1];
+            testlight.position.z = spline.geometry.attributes.position.array[lineLightstep * 3 + 2];
+        }
+        lineLightstep++;
+        if (lineLightstep >= lineStep) {
+            lineLightstep = 0;
+        }
+
+
+    }
+
     addGround() {
         var groundMesh = new THREE.Mesh(new THREE.CubeGeometry(this.ground.x, this.ground.y, this.ground.z),
             new THREE.MeshLambertMaterial({
@@ -391,6 +505,7 @@ class MapView extends React.Component {
         this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
+        this.updateLineLight();
         //this.trackballControls.update(delta);
         this.requestID = requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
