@@ -33,8 +33,8 @@ class MapData {
     }
     getJsonData() {
         var context = this;
-        if(!this.data) return;
-        var dataJson =  [];
+        if (!this.data) return;
+        var dataJson = [];
         this.data.forEach((d) => {
             var layer = {};
             layer.area = [];
@@ -44,7 +44,7 @@ class MapData {
             })
             dataJson.push(layer);
         })
-        console.log('getJsonData',dataJson);
+        console.log('getJsonData', dataJson);
         return dataJson;
     }
     getCurMapData() {

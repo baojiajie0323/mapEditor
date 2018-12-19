@@ -27,7 +27,7 @@ class Map extends React.Component {
         this.mapCanvas.width = mapWidth;
         this.mapCanvas.height = mapHeight;
 
-        this.mapRender = new MapRender(this.mapCanvas);
+        this.mapRender = new MapRender(this.mapCanvas,this.props.dispatch);
         this.mapRender.contextmenucb = this.onContextMenu;
         console.log("componentDidMount", mapWidth, mapHeight);
 

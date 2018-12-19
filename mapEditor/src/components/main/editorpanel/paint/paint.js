@@ -7,6 +7,7 @@ const Panel = Collapse.Panel;
 import SettingIcon from 'material-ui/svg-icons/action/touch-app';
 import PathIcon from 'material-ui/svg-icons/action/timeline';
 import EditIcon from 'material-ui/svg-icons/image/edit';
+import TextField from 'material-ui/TextField';
 
 class Paint extends React.Component {
     constructor(props) {
@@ -16,7 +17,6 @@ class Paint extends React.Component {
         this.onClickDrawPolygon = this.onClickDrawPolygon.bind(this);
     }
     componentDidMount() {
-
     }
     onClickDrawRect() {
         console.log("onClickDrawRect");
@@ -30,12 +30,26 @@ class Paint extends React.Component {
     }
     render() {
         const text = `请在界面上选择元素`;
-        const { drawMode } = this.props;
+        const { drawMode, selectedArea } = this.props;
+
+        console.log('selectedArea:', selectedArea);
         return (
             <div className={styles.paint}>
-                <Collapse bordered={false} defaultActiveKey={['1']}>
+                <Collapse bordered={false} defaultActiveKey={['1', '2', '3']}>
                     <Panel header={<div className={[styles.title, styles.pointer].join(' ')}>选择元素</div>} key="1">
-                        <p>{text}</p>
+                        {selectedArea ?
+                            [<div className={styles.form}>
+                                <span>区域名称</span>
+                                <TextField defaultValue={"一监区"} id="areaname"
+                                />
+                            </div>,
+                            <div className={styles.form}>
+                                <span>高度</span>
+                                <TextField defaultValue={"10"}
+                                />
+                            </div>
+                            ]
+                            : <p>{text}</p>}
                     </Panel>
                     <Panel header={<div className={[styles.title, styles.icon].join(' ')}>图标</div>} key="2">
                         <p>{text}</p>
@@ -70,9 +84,10 @@ class Paint extends React.Component {
 
 function MapToStates(states) {
     console.log("MapToStates", states)
-    const { drawMode } = states.mapeditor;
+    const { drawMode, selectedArea } = states.mapeditor;
     return {
-        drawMode
+        drawMode,
+        selectedArea
     }
 }
 export default connect(MapToStates)(Paint)

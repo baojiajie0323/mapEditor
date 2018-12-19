@@ -4,14 +4,14 @@ import MapData from './mapData';
 import Util from './util';
 
 class MapRender {
-    constructor(canvas) {
+    constructor(canvas,dispatch) {
         this._map = canvas;
         this._mapHandle = null;
         this.contextmenucb = null;
         this.showMousePoint = true;
         this.drawAreaMode = "";
         this.areaPoint = [];
-
+        this.dispatch = dispatch;
         this.init();
     }
     init() {

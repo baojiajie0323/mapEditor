@@ -6,6 +6,7 @@ class MapArea {
         this.map = mapRender._map;
         this._mapHandle = mapRender._mapHandle;
 
+        this.id = Util.getUUID();
         this.type = type;
         this.points = Object.assign([], points);
         this.text = text;
@@ -87,6 +88,8 @@ class MapArea {
             this.selected = this.mouseInArea;
             if (!this.selected) {
                 this.editMode = false;
+            } else {
+                this._mapRender.dispatch({ type: 'mapeditor/selectedArea', payload: this.id });
             }
             this._mapRender.draw();
         }

@@ -30,7 +30,7 @@ class DataModal extends React.Component {
     renderMapData() {
         var mapData = MapData.instance().getJsonData();
         if (!mapData) return null;
-        console.log("MapData", mapData);
+        console.log("MapData", JSON.stringify(mapData));
         return mapData.map((m) => {
             return (
                 <div>
