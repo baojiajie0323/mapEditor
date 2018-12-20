@@ -5,7 +5,11 @@ import styles from './map.less'
 // var step = 0;
 var lineLightstep = 0;
 const lineStep = 300;
-const levelHeight = 600;
+const LEVEL_HEIGHT = 900;
+
+var domainlist_level1 = [
+    ""
+]
 
 class MapView extends React.Component {
     constructor(props) {
@@ -28,6 +32,10 @@ class MapView extends React.Component {
             z: 10
         }
         this.areas = [];
+
+        this.plat0 = [];
+        this.plat1 = [];
+        this.plat2 = [];
         this.clock = new THREE.Clock();
         this.onMouseClick = this.onMouseClick.bind(this);
     }
@@ -149,7 +157,7 @@ class MapView extends React.Component {
         this.initTopo();
 
         var axesHelper = new THREE.AxesHelper(500);
-        this.scene.add(axesHelper);
+        //this.scene.add(axesHelper);
 
         // this.trackballControls = new THREE.TrackballControls(this.camera);
         // this.trackballControls.rotateSpeed = 0.3;
@@ -177,19 +185,26 @@ class MapView extends React.Component {
         this.scene.add(this.ambientLight); //环境光 
         //this.scene.add(this.directLight);  //方向光
     }
-    addPlat(level) {
-        var mesh1 = new THREE.Mesh(new THREE.CubeGeometry(80, 100, 50),
+    addPlatLevel0() {
+        this.plat0 = [];
+        var CUBE_X = 160;
+        var CUBE_Y = 200;
+        var CUBE_Z = 100;
+        var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
             new THREE.MeshLambertMaterial({
                 color: 0xff0000,
-                emissive: 0x000000,
+                emissive: 0x5690FF,
             })
         );
-        mesh1.position.x = 0;
-        mesh1.position.y = 600;
-        mesh1.position.z = 0;
+        mesh.position.x = 0;
+        mesh.position.y = LEVEL_HEIGHT * 2 + CUBE_Y / 2;
+        mesh.position.z = 0;
+        this.scene.add(mesh);
+        this.plat0.push(mesh);
     }
-    initTopo() {
-        var nGap = 100;
+    addPlatLevel1() {
+        this.plat1 = [];
+        var nGap = 200;
         var ROW_COUNT = 5;
         var COLUMN_COUNT = 4;
         var CUBE_X = 80;
@@ -197,41 +212,38 @@ class MapView extends React.Component {
         var CUBE_Z = 50;
         var LINE_JOIN_HEIGHT = 300;
         var point = new THREE.Vector3();
-        var mesh1 = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
-            new THREE.MeshLambertMaterial({
-                color: 0xff0000,
-                emissive: 0x000000,
-            })
-        );
-        mesh1.position.x = 0;
-        mesh1.position.y = 600 + CUBE_Y / 2;
-        mesh1.position.z = 0;
-        this.scene.add(mesh1);
-
-        this.splineArray = [];
-        this.lightArray = [];
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
             for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
-                var mesh2 = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
+                // 平台方块
+                var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
                     new THREE.MeshLambertMaterial({
                         color: 0xff3300,
                         //ambient: 0x858685,
-                        emissive: 0x000000,
+                        emissive: 0x5690FF,
                     })
                 );
-                mesh2.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
-                mesh2.position.y = CUBE_Y / 2;
-                mesh2.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
-                this.scene.add(mesh2);
+                mesh.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
+                mesh.position.y = LEVEL_HEIGHT + CUBE_Y / 2;
+                mesh.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
+                this.scene.add(mesh);
+                this.plat1.push(mesh);
 
+                // 文字
+                var textmesh = this.createSpriteText("安阳支队");
+                textmesh.position.x = mesh.position.x;
+                textmesh.position.y = mesh.position.y + CUBE_Y / 2 + 20;
+                textmesh.position.z = mesh.position.z;
+                this.scene.add(textmesh);
+
+                // 与上级的连线
                 var curve = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(0, 600, 0),
-                    new THREE.Vector3(0, 0 + CUBE_Y + LINE_JOIN_HEIGHT, 0),
-                    new THREE.Vector3(mesh2.position.x, 0 + CUBE_Y + LINE_JOIN_HEIGHT, mesh2.position.z),
-                    new THREE.Vector3(mesh2.position.x, 0 + CUBE_Y, mesh2.position.z),
+                    new THREE.Vector3(0, LEVEL_HEIGHT * 2, 0),
+                    new THREE.Vector3(0, LEVEL_HEIGHT + CUBE_Y + LINE_JOIN_HEIGHT, 0),
+                    new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + CUBE_Y + LINE_JOIN_HEIGHT, mesh.position.z),
+                    new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + CUBE_Y, mesh.position.z),
                 ]);
                 curve.curveType = 'catmullrom';
-                curve.tension = 0.01;
+                curve.tension = 0.05;
 
                 var geometry = new THREE.BufferGeometry();
                 geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineStep * 3), 3));
@@ -242,89 +254,282 @@ class MapView extends React.Component {
                     position.setXYZ(i, point.x, point.y, point.z);
                 }
 
-                var material = new THREE.LineBasicMaterial({ color: 0x327ABF, linewidth: 10 });
+                var material = new THREE.LineBasicMaterial({ color: 0x327ABF });
                 //Create the final Object3d to add to the scene
                 var splineObject = new THREE.Line(geometry, material);
                 this.scene.add(splineObject);
 
-                var sphere = new THREE.SphereBufferGeometry(4, 32, 32);
-                var testlight = new THREE.PointLight(0x00FF7F, 1, 100);
-                testlight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
-                this.scene.add(testlight);
+                var sphere = new THREE.SphereBufferGeometry(8, 32, 32);
+                //var linelight = new THREE.PointLight(0xffffff, 1, 10);
+                //linelight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
+                var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F }))
+                this.scene.add(linelight);
 
-                this.splineArray.push(splineObject);
-                this.lightArray.push(testlight);
+                this.lightAnimateObj.push({
+                    splineObject,
+                    linelight
+                })
             }
         }
 
-        var geometry = new THREE.PlaneGeometry(
-            COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
-            ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
-        );
-        var material = new THREE.MeshBasicMaterial({
-            color: 0x9370DB,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.4
-        });
-        var plane = new THREE.Mesh(geometry, material);
-        plane.rotation.x = - Math.PI / 2;
-        plane.position.y -= 2;
+        var createWall = () => {
+            var geometry = new THREE.PlaneGeometry(
+                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
+            );
+            var material = new THREE.MeshBasicMaterial({
+                color: 0x9370DB,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.4
+            });
+            var plane = new THREE.Mesh(geometry, material);
+            plane.rotation.x = - Math.PI / 2;
+            plane.position.y += LEVEL_HEIGHT - 2;
 
-        let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-        let edgesMtl = new THREE.LineBasicMaterial({ color: 0x8A2BE2 });
-        let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
-        plane.add(cubeLine);
+            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x8A2BE2 });
+            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+            plane.add(cubeLine);
 
+            var geometry1 = new THREE.PlaneGeometry(
+                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                LINE_JOIN_HEIGHT
+            );
+            var geometry2 = new THREE.PlaneGeometry(
+                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
+                LINE_JOIN_HEIGHT
+            );
+            var material_wall = new THREE.MeshBasicMaterial({
+                color: 0x9370DB,
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: 0.25
+            });
+            var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
+            var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
+            var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
+            var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
+            plane_wall1.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
+            plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
-        var geometry1 = new THREE.PlaneGeometry(
-            COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
-            LINE_JOIN_HEIGHT
-        );
-        var geometry2 = new THREE.PlaneGeometry(
-            ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
-            LINE_JOIN_HEIGHT
-        );
-        var material_wall = new THREE.MeshBasicMaterial({
-            color: 0x9370DB,
-            side: THREE.BackSide,
-            transparent: true,
-            opacity: 0.25
-        });
-        var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
-        var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
-        var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
-        var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
-        plane_wall1.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
-        plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall2.rotation.y = Math.PI / 2;
+            plane_wall2.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
+            plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
-        plane_wall2.rotation.y = Math.PI / 2;
-        plane_wall2.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
-        plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            plane_wall3.rotation.y = Math.PI;
+            plane_wall3.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
+            plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
-        plane_wall3.rotation.y = Math.PI;
-        plane_wall3.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
-        plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall4.rotation.y = - Math.PI / 2;
+            plane_wall4.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
+            plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
-        plane_wall4.rotation.y = - Math.PI / 2;
-        plane_wall4.position.y -= -LINE_JOIN_HEIGHT / 2 + 2;
-        plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            this.scene.add(plane);
+            this.scene.add(plane_wall1);
+            this.scene.add(plane_wall2);
+            this.scene.add(plane_wall3);
+            this.scene.add(plane_wall4);
+        }
+        createWall();
+    }
+    addPlatLevel2() {
+        this.plat2 = [];
+        var nGap = 400;
+        var ROW_COUNT = 5;
+        var COLUMN_COUNT = 4;
+        var CUBE_X = 120;
+        var CUBE_Y = 150;
+        var CUBE_Z = 75;
+        var LINE_JOIN_HEIGHT = 260;
+        var point = new THREE.Vector3();
+        for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
+            for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
+                // 平台方块
+                var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
+                    new THREE.MeshLambertMaterial({
+                        color: 0xff3300,
+                        //ambient: 0x858685,
+                        emissive: 0x5690FF,
+                    })
+                );
+                mesh.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
+                mesh.position.y = CUBE_Y / 2;
+                mesh.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
+                this.scene.add(mesh);
+                this.plat2.push(mesh);
 
+                // 与上级的连线
+                var nIndex = nRow * COLUMN_COUNT + nColumn;
+                var position = {};
+                if (this.plat1.length == 1) {
+                    position = this.plat1[0].position;
+                } else {
+                    position = this.plat1[nIndex].position;
+                }
+                var curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(position.x, LEVEL_HEIGHT * 1, position.z),
+                    new THREE.Vector3(position.x, CUBE_Y + LINE_JOIN_HEIGHT, position.z),
+                    new THREE.Vector3(mesh.position.x, CUBE_Y + LINE_JOIN_HEIGHT, mesh.position.z),
+                    new THREE.Vector3(mesh.position.x, CUBE_Y, mesh.position.z),
+                ]);
+                curve.curveType = 'catmullrom';
+                curve.tension = 0.05;
 
-        this.scene.add(plane);
-        this.scene.add(plane_wall1);
-        this.scene.add(plane_wall2);
-        this.scene.add(plane_wall3);
-        this.scene.add(plane_wall4);
+                var geometry = new THREE.BufferGeometry();
+                geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineStep * 3), 3));
+                var position = geometry.attributes.position;
+                for (var i = 0; i < lineStep; i++) {
+                    var t = i / (lineStep - 1);
+                    curve.getPoint(t, point);
+                    position.setXYZ(i, point.x, point.y, point.z);
+                }
 
+                var material = new THREE.LineBasicMaterial({ color: 0x327ABF });
+                //Create the final Object3d to add to the scene
+                var splineObject = new THREE.Line(geometry, material);
+                this.scene.add(splineObject);
+
+                var sphere = new THREE.SphereBufferGeometry(8, 32, 32);
+                //var linelight = new THREE.PointLight(0xffffff, 1, 10);
+                //linelight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
+                var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F }))
+                this.scene.add(linelight);
+
+                this.lightAnimateObj.push({
+                    splineObject,
+                    linelight
+                })
+            }
+        }
+
+        var createWall = () => {
+            var geometry = new THREE.PlaneGeometry(
+                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
+            );
+            var material = new THREE.MeshBasicMaterial({
+                color: 0x9370DB,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.4
+            });
+            var plane = new THREE.Mesh(geometry, material);
+            plane.rotation.x = - Math.PI / 2;
+            plane.position.y += -2;
+
+            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x8A2BE2 });
+            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+            plane.add(cubeLine);
+
+            var geometry1 = new THREE.PlaneGeometry(
+                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                LINE_JOIN_HEIGHT
+            );
+            var geometry2 = new THREE.PlaneGeometry(
+                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
+                LINE_JOIN_HEIGHT
+            );
+            var material_wall = new THREE.MeshBasicMaterial({
+                color: 0x9370DB,
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: 0.25
+            });
+            var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
+            var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
+            var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
+            var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
+            plane_wall1.position.y += LINE_JOIN_HEIGHT / 2 - 2;
+            plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+
+            plane_wall2.rotation.y = Math.PI / 2;
+            plane_wall2.position.y += LINE_JOIN_HEIGHT / 2 - 2;
+            plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+
+            plane_wall3.rotation.y = Math.PI;
+            plane_wall3.position.y += LINE_JOIN_HEIGHT / 2 - 2;
+            plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+
+            plane_wall4.rotation.y = - Math.PI / 2;
+            plane_wall4.position.y += LINE_JOIN_HEIGHT / 2 - 2;
+            plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+
+            this.scene.add(plane);
+            this.scene.add(plane_wall1);
+            this.scene.add(plane_wall2);
+            this.scene.add(plane_wall3);
+            this.scene.add(plane_wall4);
+        }
+        createWall();
+    }
+    createPlat() {
+        var group = new THREE.Group();
+        this.plat0 = [];
+        var OUT_X = 256;
+        var OUT_Y = 256;
+        var OUT_Z = 256;
+        var INNER_X = 101;
+        var INNER_Y = 207;
+        var INNER_Z = 207;
+
+        var createOutMesh = () => {
+            var geometry = new THREE.CubeGeometry(OUT_X, OUT_Y, OUT_Z);
+            var mesh = new THREE.Mesh(geometry,
+                [
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false}),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
+                    new THREE.MeshBasicMaterial({ color: 0x3f98c3, side: THREE.DoubleSide,depthWrite:false }),
+                    new THREE.MeshBasicMaterial({ visible:false }),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
+                ]
+            );
+            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x47c6ea });
+            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+            mesh.add(cubeLine);
+            return mesh;
+        }
+        var createInnerMesh = () => {
+            var geometry = new THREE.CubeGeometry(INNER_X, INNER_Y, INNER_Z);
+            var texture = new THREE.TextureLoader().load('assets/plat.png');
+            var mesh = new THREE.Mesh(geometry,
+                [
+                    new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //r
+                    new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //l
+                    new THREE.MeshBasicMaterial({ color: 0xa6feff }), //t
+                    new THREE.MeshBasicMaterial({ color: 0xa6feff }), //b
+                    new THREE.MeshBasicMaterial({ map: texture }),    //f
+                    new THREE.MeshBasicMaterial({ color: 0x9aecf8 }), //back
+                ]
+            );
+            return mesh;
+        }
+        var outMesh = createOutMesh();
+        var innerMesh = createInnerMesh();
+        innerMesh.position.y -= (OUT_Y - INNER_Y) / 2 - 3;
+        group.add(outMesh);
+        group.add(innerMesh);
+        return group;
+    }
+    initTopo() {
+        this.lightAnimateObj = [];
+        var platObj = this.createPlat();
+        platObj.position.y += 128;
+        this.scene.add(platObj);
+        // this.addPlatLevel0();
+        // this.addPlatLevel1();
+        // this.addPlatLevel2();
     }
     updateLineLight() {
-        for (var i = 0; i < this.splineArray.length; i++) {
-            var testlight = this.lightArray[i];
-            var spline = this.splineArray[i];
-            testlight.position.x = spline.geometry.attributes.position.array[lineLightstep * 3];
-            testlight.position.y = spline.geometry.attributes.position.array[lineLightstep * 3 + 1];
-            testlight.position.z = spline.geometry.attributes.position.array[lineLightstep * 3 + 2];
+        for (var i = 0; i < this.lightAnimateObj.length; i++) {
+            var { linelight } = this.lightAnimateObj[i];
+            var { splineObject } = this.lightAnimateObj[i];
+            linelight.position.x = splineObject.geometry.attributes.position.array[lineLightstep * 3];
+            linelight.position.y = splineObject.geometry.attributes.position.array[lineLightstep * 3 + 1];
+            linelight.position.z = splineObject.geometry.attributes.position.array[lineLightstep * 3 + 2];
         }
         lineLightstep++;
         if (lineLightstep >= lineStep) {
@@ -482,7 +687,7 @@ class MapView extends React.Component {
         canvas.height = 500;
         // ctx.fillStyle = "#f00";
         // ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = "#fff";
         ctx.font = "bold 80px 微软雅黑";
         ctx.lineWidth = 4;
         ctx.textAlign = "center"
