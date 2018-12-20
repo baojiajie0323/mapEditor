@@ -7,6 +7,10 @@ var lineLightstep = 0;
 const lineStep = 300;
 const LEVEL_HEIGHT = 900;
 
+var OUT_X = 256;
+var OUT_Y = 256;
+var OUT_Z = 256;
+
 var domainlist_level1 = [
     ""
 ]
@@ -157,7 +161,7 @@ class MapView extends React.Component {
         this.initTopo();
 
         var axesHelper = new THREE.AxesHelper(500);
-        //this.scene.add(axesHelper);
+        this.scene.add(axesHelper);
 
         // this.trackballControls = new THREE.TrackballControls(this.camera);
         // this.trackballControls.rotateSpeed = 0.3;
@@ -187,95 +191,80 @@ class MapView extends React.Component {
     }
     addPlatLevel0() {
         this.plat0 = [];
-        var CUBE_X = 160;
-        var CUBE_Y = 200;
-        var CUBE_Z = 100;
-        var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
-            new THREE.MeshLambertMaterial({
-                color: 0xff0000,
-                emissive: 0x5690FF,
-            })
-        );
-        mesh.position.x = 0;
-        mesh.position.y = LEVEL_HEIGHT * 2 + CUBE_Y / 2;
-        mesh.position.z = 0;
-        this.scene.add(mesh);
-        this.plat0.push(mesh);
+        var scale = 1;
+        var platObj = this.createPlat(scale);
+        platObj.position.x = 0;
+        platObj.position.y = LEVEL_HEIGHT * 2 + OUT_Y / 2;
+        platObj.position.z = 0;
+        this.scene.add(platObj);
+        this.plat0.push(platObj);
     }
     addPlatLevel1() {
         this.plat1 = [];
         var nGap = 200;
         var ROW_COUNT = 5;
         var COLUMN_COUNT = 4;
-        var CUBE_X = 80;
-        var CUBE_Y = 100;
-        var CUBE_Z = 50;
         var LINE_JOIN_HEIGHT = 300;
+        var scale = 0.6;
         var point = new THREE.Vector3();
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
             for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
                 // 平台方块
-                var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
-                    new THREE.MeshLambertMaterial({
-                        color: 0xff3300,
-                        //ambient: 0x858685,
-                        emissive: 0x5690FF,
-                    })
-                );
-                mesh.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
-                mesh.position.y = LEVEL_HEIGHT + CUBE_Y / 2;
-                mesh.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
-                this.scene.add(mesh);
-                this.plat1.push(mesh);
+                var platObj = this.createPlat(scale);
+                platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
+                platObj.position.y = LEVEL_HEIGHT + OUT_Y / 2;
+                platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
+                this.scene.add(platObj);
+                this.plat1.push(platObj);
 
-                // 文字
-                var textmesh = this.createSpriteText("安阳支队");
-                textmesh.position.x = mesh.position.x;
-                textmesh.position.y = mesh.position.y + CUBE_Y / 2 + 20;
-                textmesh.position.z = mesh.position.z;
-                this.scene.add(textmesh);
+                // // 文字
+                // var textmesh = this.createSpriteText("安阳支队");
+                // textmesh.position.x = mesh.position.x;
+                // textmesh.position.y = mesh.position.y + OUT_Y / 2 + 20;
+                // textmesh.position.z = mesh.position.z;
+                // this.scene.add(textmesh);
 
-                // 与上级的连线
-                var curve = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(0, LEVEL_HEIGHT * 2, 0),
-                    new THREE.Vector3(0, LEVEL_HEIGHT + CUBE_Y + LINE_JOIN_HEIGHT, 0),
-                    new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + CUBE_Y + LINE_JOIN_HEIGHT, mesh.position.z),
-                    new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + CUBE_Y, mesh.position.z),
-                ]);
-                curve.curveType = 'catmullrom';
-                curve.tension = 0.05;
+                // // 与上级的连线
+                // var curve = new THREE.CatmullRomCurve3([
+                //     new THREE.Vector3(0, LEVEL_HEIGHT * 2, 0),
+                //     new THREE.Vector3(0, LEVEL_HEIGHT + OUT_Y + LINE_JOIN_HEIGHT, 0),
+                //     new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + OUT_Y + LINE_JOIN_HEIGHT, mesh.position.z),
+                //     new THREE.Vector3(mesh.position.x, LEVEL_HEIGHT + OUT_Y, mesh.position.z),
+                // ]);
+                // curve.curveType = 'catmullrom';
+                // curve.tension = 0.05;
 
-                var geometry = new THREE.BufferGeometry();
-                geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineStep * 3), 3));
-                var position = geometry.attributes.position;
-                for (var i = 0; i < lineStep; i++) {
-                    var t = i / (lineStep - 1);
-                    curve.getPoint(t, point);
-                    position.setXYZ(i, point.x, point.y, point.z);
-                }
+                // var geometry = new THREE.BufferGeometry();
+                // geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineStep * 3), 3));
+                // var position = geometry.attributes.position;
+                // for (var i = 0; i < lineStep; i++) {
+                //     var t = i / (lineStep - 1);
+                //     curve.getPoint(t, point);
+                //     position.setXYZ(i, point.x, point.y, point.z);
+                // }
 
-                var material = new THREE.LineBasicMaterial({ color: 0x327ABF });
-                //Create the final Object3d to add to the scene
-                var splineObject = new THREE.Line(geometry, material);
-                this.scene.add(splineObject);
+                // var material = new THREE.LineBasicMaterial({ color: 0x327ABF });
+                // //Create the final Object3d to add to the scene
+                // var splineObject = new THREE.Line(geometry, material);
+                // this.scene.add(splineObject);
 
-                var sphere = new THREE.SphereBufferGeometry(8, 32, 32);
-                //var linelight = new THREE.PointLight(0xffffff, 1, 10);
-                //linelight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
-                var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F }))
-                this.scene.add(linelight);
+                // var sphere = new THREE.SphereBufferGeometry(8, 32, 32);
+                // //var linelight = new THREE.PointLight(0xffffff, 1, 10);
+                // //linelight.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F })));
+                // var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0x00FF7F }))
+                // this.scene.add(linelight);
 
-                this.lightAnimateObj.push({
-                    splineObject,
-                    linelight
-                })
+                // this.lightAnimateObj.push({
+                //     splineObject,
+                //     linelight
+                // })
             }
         }
 
         var createWall = () => {
             var geometry = new THREE.PlaneGeometry(
-                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
-                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
+                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100,
+                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100
             );
             var material = new THREE.MeshBasicMaterial({
                 color: 0x9370DB,
@@ -293,11 +282,11 @@ class MapView extends React.Component {
             plane.add(cubeLine);
 
             var geometry1 = new THREE.PlaneGeometry(
-                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100,
                 LINE_JOIN_HEIGHT
             );
             var geometry2 = new THREE.PlaneGeometry(
-                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
+                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100,
                 LINE_JOIN_HEIGHT
             );
             var material_wall = new THREE.MeshBasicMaterial({
@@ -311,19 +300,19 @@ class MapView extends React.Component {
             var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
             var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
             plane_wall1.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
             plane_wall2.rotation.y = Math.PI / 2;
             plane_wall2.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
             plane_wall3.rotation.y = Math.PI;
             plane_wall3.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
             plane_wall4.rotation.y = - Math.PI / 2;
             plane_wall4.position.y += LINE_JOIN_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
             this.scene.add(plane);
             this.scene.add(plane_wall1);
@@ -338,24 +327,24 @@ class MapView extends React.Component {
         var nGap = 400;
         var ROW_COUNT = 5;
         var COLUMN_COUNT = 4;
-        var CUBE_X = 120;
-        var CUBE_Y = 150;
-        var CUBE_Z = 75;
+        var OUT_X = 120;
+        var OUT_Y = 150;
+        var OUT_Z = 75;
         var LINE_JOIN_HEIGHT = 260;
         var point = new THREE.Vector3();
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
             for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
                 // 平台方块
-                var mesh = new THREE.Mesh(new THREE.CubeGeometry(CUBE_X, CUBE_Y, CUBE_Z),
+                var mesh = new THREE.Mesh(new THREE.CubeGeometry(OUT_X, OUT_Y, OUT_Z),
                     new THREE.MeshLambertMaterial({
                         color: 0xff3300,
                         //ambient: 0x858685,
                         emissive: 0x5690FF,
                     })
                 );
-                mesh.position.x = - (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (CUBE_X + nGap) + CUBE_X / 2;
-                mesh.position.y = CUBE_Y / 2;
-                mesh.position.z = - (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (CUBE_Y + nGap) + CUBE_Y / 2;
+                mesh.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
+                mesh.position.y = OUT_Y / 2;
+                mesh.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
                 this.scene.add(mesh);
                 this.plat2.push(mesh);
 
@@ -369,9 +358,9 @@ class MapView extends React.Component {
                 }
                 var curve = new THREE.CatmullRomCurve3([
                     new THREE.Vector3(position.x, LEVEL_HEIGHT * 1, position.z),
-                    new THREE.Vector3(position.x, CUBE_Y + LINE_JOIN_HEIGHT, position.z),
-                    new THREE.Vector3(mesh.position.x, CUBE_Y + LINE_JOIN_HEIGHT, mesh.position.z),
-                    new THREE.Vector3(mesh.position.x, CUBE_Y, mesh.position.z),
+                    new THREE.Vector3(position.x, OUT_Y + LINE_JOIN_HEIGHT, position.z),
+                    new THREE.Vector3(mesh.position.x, OUT_Y + LINE_JOIN_HEIGHT, mesh.position.z),
+                    new THREE.Vector3(mesh.position.x, OUT_Y, mesh.position.z),
                 ]);
                 curve.curveType = 'catmullrom';
                 curve.tension = 0.05;
@@ -405,8 +394,8 @@ class MapView extends React.Component {
 
         var createWall = () => {
             var geometry = new THREE.PlaneGeometry(
-                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
-                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100
+                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100,
+                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100
             );
             var material = new THREE.MeshBasicMaterial({
                 color: 0x9370DB,
@@ -424,11 +413,11 @@ class MapView extends React.Component {
             plane.add(cubeLine);
 
             var geometry1 = new THREE.PlaneGeometry(
-                COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100,
+                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100,
                 LINE_JOIN_HEIGHT
             );
             var geometry2 = new THREE.PlaneGeometry(
-                ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100,
+                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100,
                 LINE_JOIN_HEIGHT
             );
             var material_wall = new THREE.MeshBasicMaterial({
@@ -442,19 +431,19 @@ class MapView extends React.Component {
             var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
             var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
             plane_wall1.position.y += LINE_JOIN_HEIGHT / 2 - 2;
-            plane_wall1.position.z += (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
             plane_wall2.rotation.y = Math.PI / 2;
             plane_wall2.position.y += LINE_JOIN_HEIGHT / 2 - 2;
-            plane_wall2.position.x += (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
             plane_wall3.rotation.y = Math.PI;
             plane_wall3.position.y += LINE_JOIN_HEIGHT / 2 - 2;
-            plane_wall3.position.z -= (ROW_COUNT * CUBE_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
+            plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
 
             plane_wall4.rotation.y = - Math.PI / 2;
             plane_wall4.position.y += LINE_JOIN_HEIGHT / 2 - 2;
-            plane_wall4.position.x -= (COLUMN_COUNT * CUBE_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
+            plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
 
             this.scene.add(plane);
             this.scene.add(plane_wall1);
@@ -464,32 +453,34 @@ class MapView extends React.Component {
         }
         createWall();
     }
-    createPlat() {
+    createPlat(scale) {
         var group = new THREE.Group();
         this.plat0 = [];
-        var OUT_X = 256;
-        var OUT_Y = 256;
-        var OUT_Z = 256;
         var INNER_X = 101;
         var INNER_Y = 207;
         var INNER_Z = 207;
-
+        var depthWrite = false;
         var createOutMesh = () => {
             var geometry = new THREE.CubeGeometry(OUT_X, OUT_Y, OUT_Z);
             var mesh = new THREE.Mesh(geometry,
                 [
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false}),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
-                    new THREE.MeshBasicMaterial({ color: 0x3f98c3, side: THREE.DoubleSide,depthWrite:false }),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:depthWrite}),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:depthWrite }),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:depthWrite }),
+                    new THREE.MeshBasicMaterial({ color: 0x3f98c3, side: THREE.DoubleSide,depthWrite:true,blending:THREE.NoBlending }),
                     new THREE.MeshBasicMaterial({ visible:false }),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:false }),
+                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide,depthWrite:depthWrite }),
                 ]
             );
             let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
             let edgesMtl = new THREE.LineBasicMaterial({ color: 0x47c6ea });
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
             mesh.add(cubeLine);
+
+            // mesh.material.polygonOffset=true;//开启偏移
+            // mesh.material.polygonOffsetFactor= -10;//与相机距离减2
+            // mesh.material.polygonOffsetUnits=1;//偏移的单位
+
             return mesh;
         }
         var createInnerMesh = () => {
@@ -500,7 +491,7 @@ class MapView extends React.Component {
                     new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //r
                     new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //l
                     new THREE.MeshBasicMaterial({ color: 0xa6feff }), //t
-                    new THREE.MeshBasicMaterial({ color: 0xa6feff }), //b
+                    new THREE.MeshBasicMaterial({ color: 0xa6feff,blending:THREE.NoBlending }), //b
                     new THREE.MeshBasicMaterial({ map: texture }),    //f
                     new THREE.MeshBasicMaterial({ color: 0x9aecf8 }), //back
                 ]
@@ -509,18 +500,20 @@ class MapView extends React.Component {
         }
         var outMesh = createOutMesh();
         var innerMesh = createInnerMesh();
-        innerMesh.position.y -= (OUT_Y - INNER_Y) / 2 - 3;
+        innerMesh.position.y -= (OUT_Y - INNER_Y) / 2 - 20;
         group.add(outMesh);
         group.add(innerMesh);
+        group.position.y -= OUT_Y / 2;
+        group.scale.set(scale,scale,scale);
         return group;
     }
     initTopo() {
         this.lightAnimateObj = [];
-        var platObj = this.createPlat();
-        platObj.position.y += 128;
-        this.scene.add(platObj);
-        // this.addPlatLevel0();
-        // this.addPlatLevel1();
+        // var platObj = this.createPlat();
+        // platObj.position.y += 128;
+        // this.scene.add(platObj);
+        this.addPlatLevel0();
+        this.addPlatLevel1();
         // this.addPlatLevel2();
     }
     updateLineLight() {
