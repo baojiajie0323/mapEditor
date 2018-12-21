@@ -233,9 +233,10 @@ class MapView extends React.Component {
 
         this.orbitControls = new THREE.OrbitControls(this.camera);
         this.orbitControls.autoRotate = true;
-        this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.LEFT }
+        this.orbitControls.enablePan = false;
+        this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT }
         this.orbitControls.maxPolarAngle = Math.PI / 2;
-        this.orbitControls.target = new THREE.Vector3(0,300,0);
+        this.orbitControls.target = new THREE.Vector3(0,500,0);
         this.orbitControls.saveState();
         this.raycaster = new THREE.Raycaster();
 
@@ -243,8 +244,8 @@ class MapView extends React.Component {
     initCamera() {
         //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 1, 8000);
-        this.camera.position.set(0, 2260, 3015);
-        this.camera.lookAt(new THREE.Vector3(0, 700, 0));
+        this.camera.position.set(0, 2860, 3215);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
     }
     initLight() {
@@ -277,8 +278,8 @@ class MapView extends React.Component {
             this.scene.remove(a);
         })
         this.plat0 = [];
-        var scale = 1;
-        var nGap = 100;
+        var scale = 2;
+        var nGap = 200;
         var platObj = this.createPlat('1', scale, "河南监管总队", "#fff");
         platObj.position.x = 0;
         platObj.position.y += LEVEL_HEIGHT0;
@@ -288,8 +289,8 @@ class MapView extends React.Component {
 
         var createWall = () => {
             var geometry = new THREE.PlaneGeometry(
-                OUT_X + nGap,
-                OUT_Y + nGap
+                OUT_X * scale + nGap,
+                OUT_Y * scale + nGap
             );
             var material = new THREE.MeshBasicMaterial({
                 color: 0x2d4293,
@@ -367,11 +368,11 @@ class MapView extends React.Component {
             this.scene.remove(a);
         })
         this.plat1 = [];
-        var nGap = 200;
+        var nGap = 250;
         var ROW_COUNT = 1;
         var COLUMN_COUNT = 1;
         var WALL_HEIGHT = 253;
-        var scale = 1;
+        var scale = 1.2;
         var { ROW_COUNT, COLUMN_COUNT } = this.getRowColumn(this.domainlist1.length);
 
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
@@ -641,11 +642,11 @@ class MapView extends React.Component {
                 curve.getPoint(t, point);
                 position.setXYZ(i, point.x, point.y, point.z);
             }
-            var material = new THREE.LineBasicMaterial({ color: 0x327ABF });
+            var material = new THREE.LineBasicMaterial({ color: 0x327ABF,linewidth:100 });
             var splineObject = new THREE.Line(geometry, material);
             this.scene.add(splineObject);
 
-            var sphere = new THREE.SphereBufferGeometry(4, 32, 32);
+            var sphere = new THREE.SphereBufferGeometry(6, 32, 32);
             var texture = new THREE.TextureLoader().load('assets/light.png');
             var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0xB9F7FD }))
             //var texture = new THREE.TextureLoader().load('assets/light.png');
