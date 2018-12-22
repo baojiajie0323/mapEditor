@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import styles from './map.less'
+import styles from './3dview.less'
 
 // var step = 0;
 var lineLightstep = 0;
@@ -53,29 +53,46 @@ var domainlist = [
     { id: 37, name: '安阳所1', level: 2, parentId: 10 },
     { id: 38, name: '安阳所1', level: 2, parentId: 11 },
     { id: 39, name: '安阳所1', level: 2, parentId: 12 },
+    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
 ]
 
 class MapView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            viewMode: '3D',
+            autoRotate: true
         }
         this.mapContainer = null;
         this.mapCanvas = null;
-        this.guicontrols = {
-            rotationSpeed: 0.02,
-            bouncingSpeed: 0.03,
-            ambiColor: "#fff",
-            areaAmbient: '#ff0000',
-            areaEmissive: '#ff0000',
-        }
-        this.ground = {
-            x: 1540,
-            y: 858,
-            z: 10
-        }
-        this.areas = [];
 
         this.plat0 = [];
         this.plat1 = [];
@@ -87,61 +104,58 @@ class MapView extends React.Component {
         this.onMouseClick = this.onMouseClick.bind(this);
     }
     componentDidMount() {
-        var mapWidth = this.mapContainer.offsetWidth;
-        var mapHeight = this.mapContainer.offsetHeight;
-        this.mapCanvas.width = mapWidth;
-        this.mapCanvas.height = mapHeight;
+        this.mapCanvas.width = this.mapContainer.offsetWidth;
+        this.mapCanvas.height = this.mapContainer.offsetHeight;
 
         this.platTexture = new THREE.TextureLoader().load('assets/plat.png');
+        this.wallTexture = new THREE.TextureLoader().load('assets/wall.png');
+        this.wallTexture.wrapS = THREE.RepeatWrapping;
 
         this.initStats();
-        this.initGui();
         this.initThree();
         this.animate();
 
-        document.addEventListener("dblclick", this.onMouseClick, false);
+        document.addEventListener("click", this.onMouseClick, false);
+
+        // 计算起始位置和结束位置
+        document.addEventListener("mousedown", (e) => {
+            this.beginX = e.clientX;
+            this.beginY = e.clientY;
+        }, false)
+        document.addEventListener("mouseup", (e) => {
+            this.endX = e.clientX;
+            this.endY = e.clientY;
+        }, false)
+    }
+    isdrag() {
+        if (Math.sqrt((this.beginX - this.endX) * (this.beginX - this.endX) + (this.beginY - this.endY) * (this.beginY - this.endY)) <= 1) {
+            return false;
+        }
+        return true;
     }
     componentWillUnmount() {
         if (this.requestID) {
             window.cancelAnimationFrame(this.requestID);
         }
-        //document.body.removeChild(this.gui.domElement.parentNode);
-        //this.gui
-    }
-    onClick2D = (e) => {
-        e.stopPropagation();
-        if (this.state.viewMode == '2D') {
-            return;
-        }
-        this.setState({ viewMode: '2D' }, this.initArea)
-        this.orbitControls.reset();
-        this.orbitControls.maxPolarAngle = 0;
-
-        this.initArea();
-    }
-    onClick3D = (e) => {
-        e.stopPropagation();
-        if (this.state.viewMode == '3D') {
-            return;
-        }
-        this.setState({ viewMode: '3D' }, this.initArea);
-        // new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 500)
-        //     .easing(TWEEN.Easing.Linear.None).start();
-        // this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-        this.orbitControls.reset();
-        this.orbitControls.maxPolarAngle = 2 * Math.PI;
-        new TWEEN.Tween(this.camera.position).to({ x: 0, y: 1000, z: 1000 }, 300)
-            .easing(TWEEN.Easing.Linear.None).start();
-
     }
     onClickAllView = (e) => {
         this.curPlatId = 1;
         this.resetTopo();
         console.log(this.camera);
     }
+    onClickAutoRotate = () => {
+        var { autoRotate } = this.state;
+        autoRotate = !autoRotate;
+        this.orbitControls.autoRotate = autoRotate;
+        this.orbitControls.saveState();
+        this.setState({ autoRotate: autoRotate })
+    }
     selectPlat(platObj) {
         var platname = platObj.object.name;
         var platId = platname.split('plat')[1];
+        if(this.curPlatId == platId){
+            return;
+        }
         this.curPlatId = platId;
         this.resetTopo();
         var platall = this.plat0.concat(this.plat1).concat(this.plat2);
@@ -152,7 +166,10 @@ class MapView extends React.Component {
         }
     }
     onMouseClick = (event) => {
-        console.log('onMouseUp');
+        if (this.isdrag()) {
+            return;
+        }
+        console.log('onMouseClick');
         event.preventDefault();
         var mouse = new THREE.Vector2();
         mouse.x = ((event.clientX - this.mapCanvas.getBoundingClientRect().left) / this.mapCanvas.offsetWidth) * 2 - 1;
@@ -190,71 +207,39 @@ class MapView extends React.Component {
         this.stats.domElement.style.top = '0';
         this.statdom.append(this.stats.domElement);
     }
-    initGui() {
-        this.gui = new dat.GUI();
-
-        this.gui.domElement.style.marginTop = '65px';
-        this.gui.add(this.guicontrols, 'rotationSpeed', 0, 0.5);
-        this.gui.add(this.guicontrols, 'bouncingSpeed', 0, 0.5);
-        this.gui.addColor(this.guicontrols, 'areaAmbient').onChange((e) => {
-            console.log(this.areaMaterial);
-            this.areaMaterial.color = new THREE.Color(e);
-        });
-        this.gui.addColor(this.guicontrols, 'areaEmissive').onChange((e) => {
-            console.log(this.areaMaterial);
-            this.areaMaterial.emissive = new THREE.Color(e);
-        });
-        this.gui.addColor(this.guicontrols, 'ambiColor').onChange((e) => {
-            this.ambientLight.color = new THREE.Color(e);
-        });
-    }
     initThree() {
         console.log("initThree");
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.mapCanvas,
+            alpha: true,
             antialias: true
         });
-        this.renderer.setClearColor(0x1D1B36);
+        this.renderer.setClearColor(0x000000, 0);
         this.scene = new THREE.Scene();
 
         this.initCamera();
-        this.initLight();
-        //this.addGround();
-        //this.initArea();
         this.resetTopo();
 
         var axesHelper = new THREE.AxesHelper(50);
         this.scene.add(axesHelper);
 
-        // this.trackballControls = new THREE.TrackballControls(this.camera);
-        // this.trackballControls.rotateSpeed = 0.3;
-        // this.trackballControls.zoomSpeed = 1.0;
-        // this.trackballControls.panSpeed = 1.0;
+
+        this.raycaster = new THREE.Raycaster();
+
+    }
+    initCamera() {
+        this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 1, 8000);
+        this.camera.position.set(0, 2860, 3215);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.scene.add(this.camera);
 
         this.orbitControls = new THREE.OrbitControls(this.camera);
         this.orbitControls.autoRotate = true;
         this.orbitControls.enablePan = false;
         this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT }
         this.orbitControls.maxPolarAngle = Math.PI / 2;
-        this.orbitControls.target = new THREE.Vector3(0,500,0);
+        this.orbitControls.target = new THREE.Vector3(0, 500, 0);
         this.orbitControls.saveState();
-        this.raycaster = new THREE.Raycaster();
-
-    }
-    initCamera() {
-        //this.camera = new THREE.OrthographicCamera(-this.mapCanvas.width / 2, this.mapCanvas.width / 2, -this.mapCanvas.height / 2, this.mapCanvas.height / 2, 1, 5000);
-        this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 1, 8000);
-        this.camera.position.set(0, 2860, 3215);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-        this.scene.add(this.camera);
-    }
-    initLight() {
-        //this.ambientLight = new THREE.AmbientLight(this.guicontrols.ambiColor);
-        // this.directLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        // this.directLight.position.set(0, 10000, 3000);
-
-        //this.scene.add(this.ambientLight); //环境光 
-        //this.scene.add(this.directLight);  //方向光
     }
     getRowColumn(nCount) {
         var rowMax = 10;
@@ -280,7 +265,7 @@ class MapView extends React.Component {
         this.plat0 = [];
         var scale = 2;
         var nGap = 200;
-        var platObj = this.createPlat('1', scale, "河南监管总队", "#fff");
+        var platObj = this.createPlat(1, scale, "河南监管总队", "#fff");
         platObj.position.x = 0;
         platObj.position.y += LEVEL_HEIGHT0;
         platObj.position.z = 0;
@@ -378,11 +363,11 @@ class MapView extends React.Component {
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
             for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
                 var nIndex = nRow * COLUMN_COUNT + nColumn;
-                if(nIndex >= this.domainlist1.length){
+                if (nIndex >= this.domainlist1.length) {
                     break;
                 }
                 // 平台方块
-                var platObj = this.createPlat(`${this.domainlist1[nIndex].id}`, scale, "安阳支队", "#FFF");
+                var platObj = this.createPlat(this.domainlist1[nIndex].id, scale, "安阳支队", "#FFF");
                 platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
                 platObj.position.y += LEVEL_HEIGHT1;
                 platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
@@ -419,10 +404,10 @@ class MapView extends React.Component {
                 ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap,
                 WALL_HEIGHT
             );
-            var texture = new THREE.TextureLoader().load('assets/wall.png');
-            texture.wrapS = THREE.RepeatWrapping;
+            //var texture = new THREE.TextureLoader().load('assets/wall.png');
+            //texture.wrapS = THREE.RepeatWrapping;
             var material_wall = new THREE.MeshBasicMaterial({
-                map: texture,
+                map: this.wallTexture,
                 side: THREE.BackSide,
                 transparent: true,
             });
@@ -467,19 +452,19 @@ class MapView extends React.Component {
         var WALL_HEIGHT = 253;
         var scale = 1;
 
-        if(this.curLevel == 0){
-            
+        if (this.curLevel == 0) {
+
         }
         var { ROW_COUNT, COLUMN_COUNT } = this.getRowColumn(this.domainlist2.length);
 
         for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
             for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
                 var nIndex = nRow * COLUMN_COUNT + nColumn;
-                if(nIndex >= this.domainlist2.length){
+                if (nIndex >= this.domainlist2.length) {
                     break;
                 }
                 // 平台方块
-                var platObj = this.createPlat(`${this.domainlist2[nIndex].id}`, scale, "安阳市看守所", "#FFF");
+                var platObj = this.createPlat(this.domainlist2[nIndex].id, scale, "安阳市看守所", "#FFF");
                 platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
                 platObj.position.y += 0;
                 platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
@@ -516,10 +501,10 @@ class MapView extends React.Component {
                 ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap,
                 WALL_HEIGHT
             );
-            var texture = new THREE.TextureLoader().load('assets/wall.png');
-            texture.wrapS = THREE.RepeatWrapping;
+            // var texture = new THREE.TextureLoader().load('assets/wall.png');
+            // texture.wrapS = THREE.RepeatWrapping;
             var material_wall = new THREE.MeshBasicMaterial({
-                map: texture,
+                map: this.wallTexture,
                 side: THREE.BackSide,
                 transparent: true,
             });
@@ -547,7 +532,7 @@ class MapView extends React.Component {
             this.scene.add(plane_wall2);
             this.scene.add(plane_wall3);
             this.scene.add(plane_wall4);
-            
+
             this.planeWall.push(plane);
             this.planeWall.push(plane_wall1);
             this.planeWall.push(plane_wall2);
@@ -574,7 +559,11 @@ class MapView extends React.Component {
                 ]
             );
             let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x47c6ea });
+            var borderColor = 0x47c6ea;
+            if (id == this.curPlatId) {
+                borderColor = 0xFFD700;
+            }
+            let edgesMtl = new THREE.LineBasicMaterial({ color: borderColor });
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
             mesh.add(cubeLine);
 
@@ -582,7 +571,6 @@ class MapView extends React.Component {
         }
         var createInnerMesh = () => {
             var geometry = new THREE.CubeGeometry(INNER_X, INNER_Y, INNER_Z);
-            var texture = new THREE.TextureLoader().load('assets/plat.png');
             var mesh = new THREE.Mesh(geometry,
                 [
                     new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //r
@@ -595,10 +583,24 @@ class MapView extends React.Component {
             );
             return mesh;
         }
+        var createFrameMesh = () => {
+            var geometry = new THREE.CubeGeometry(OUT_X + 30, OUT_Y + 30, OUT_Z + 30);
+            var mesh = new THREE.Mesh(geometry,
+                new THREE.MeshBasicMaterial({ color: 0x000080, opacity: 0.2, transparent: true, side: THREE.DoubleSide, depthWrite: false })
+            );
+            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x47c6ea });
+            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+            mesh.add(cubeLine);
+
+            return mesh;
+        }
         var outMesh = createOutMesh();
         outMesh.name = 'plat' + id;
         var innerMesh = createInnerMesh();
         innerMesh.position.y -= (OUT_Y - INNER_Y) / 2 - 2;
+        //var frameMesh = createFrameMesh();
+        //group.add(frameMesh);
         group.add(outMesh);
         group.add(innerMesh);
 
@@ -624,7 +626,7 @@ class MapView extends React.Component {
         var LINE_JOIN_HEIGHT0 = 300;
         var LINE_JOIN_HEIGHT1 = 400;
         var point = new THREE.Vector3();
-        var createLine = (lineStartPosition, lineEndPosition, lineJoinHeight) => {
+        var createLine = (lineStartPosition, lineEndPosition, lineJoinHeight, lineColor) => {
             var curve = new THREE.CatmullRomCurve3([
                 new THREE.Vector3(lineStartPosition.x, lineStartPosition.y, lineStartPosition.z),
                 new THREE.Vector3(lineStartPosition.x, lineEndPosition.y + lineJoinHeight, lineStartPosition.z),
@@ -642,7 +644,7 @@ class MapView extends React.Component {
                 curve.getPoint(t, point);
                 position.setXYZ(i, point.x, point.y, point.z);
             }
-            var material = new THREE.LineBasicMaterial({ color: 0x327ABF,linewidth:100 });
+            var material = new THREE.LineBasicMaterial({ color: lineColor });
             var splineObject = new THREE.Line(geometry, material);
             this.scene.add(splineObject);
 
@@ -660,25 +662,34 @@ class MapView extends React.Component {
                 linelight
             })
         }
-        // 总队与支队连线
+        // 支队与上级连线
         if (this.plat0.length > 0 && this.plat1.length > 0) {
             for (var i = 0; i < this.plat1.length; i++) {
                 var lineStartPosition = this.plat0[0].position;
                 var lineEndPosition = this.plat1[i].position;
-                createLine(lineStartPosition, lineEndPosition, LINE_JOIN_HEIGHT0);
+                createLine(lineStartPosition, lineEndPosition, LINE_JOIN_HEIGHT0, 0x327ABF);
             }
         }
 
-        // 支队与所连线
-        if (this.plat1.length > 0 && this.plat2.length > 0) {
-            for (var i = 0; i < this.plat2.length; i++) {
-                var lineStartPosition = this.plat1[0].position;
-                if (this.plat1.length > 1) {
-                    lineStartPosition = this.plat1[i].position;
+        // 所与上级连线
+        if (this.plat2.length > 0) {
+            if (this.plat1.length > 0) { // 有支队
+                for (var i = 0; i < this.plat2.length; i++) {
+                    var lineStartPosition = this.plat1[0].position;
+                    if (this.plat1.length > 1) {
+                        lineStartPosition = this.plat1[i].position;
+                    }
+                    var lineEndPosition = this.plat2[i].position;
+                    createLine(lineStartPosition, lineEndPosition, LINE_JOIN_HEIGHT1, 0x6C56C3);
                 }
-                var lineEndPosition = this.plat2[i].position;
-                createLine(lineStartPosition, lineEndPosition, LINE_JOIN_HEIGHT1);
+            } else {  // 没有支队
+                for (var i = 0; i < this.plat2.length; i++) {
+                    var lineStartPosition = this.plat0[0].position;
+                    var lineEndPosition = this.plat2[i].position;
+                    createLine(lineStartPosition, lineEndPosition, LINE_JOIN_HEIGHT0 + LINE_JOIN_HEIGHT1, 0x6C56C3);
+                }
             }
+
         }
     }
     resetTopo() {
@@ -687,7 +698,7 @@ class MapView extends React.Component {
         if (curLevel == 0) {
             this.domainlist0 = domainlist.filter(d => d.level == 0);
             this.domainlist1 = domainlist.filter(d => d.level == 1);
-            this.domainlist2 = domainlist.filter(d => d.level == 1);
+            this.domainlist2 = domainlist.filter(d => d.level == 1 || d.parentId == this.curPlatId);
         } else if (curLevel == 1) {
             this.domainlist0 = domainlist.filter(d => d.level == 0);
             this.domainlist1 = domainlist.filter(d => d.id == this.curPlatId);
@@ -746,19 +757,6 @@ class MapView extends React.Component {
 
     }
 
-    addGround() {
-        var groundMesh = new THREE.Mesh(new THREE.CubeGeometry(this.ground.x, this.ground.y, this.ground.z),
-            new THREE.MeshLambertMaterial({
-                color: 0xf1f6f7,
-                ambient: 0x858685,
-                emissive: 0x858685,
-                //wireframe: true
-            })
-        );
-        groundMesh.rotation.x = - Math.PI / 2;
-        groundMesh.name = "ground";
-        this.scene.add(groundMesh);
-    }
     createMesh(geom) {
         // assign two materials
         // var meshMaterial = new THREE.MeshNormalMaterial();
@@ -790,101 +788,6 @@ class MapView extends React.Component {
         //this.areaMesh
 
         return mesh;
-    }
-    convertPoints(points) {
-        return points.map((p) => {
-            return {
-                x: - this.ground.x / 2 + p.x,
-                y: this.ground.y / 2 - p.y
-            }
-        })
-    }
-    convertPoint(p) {
-        return {
-            x: - this.ground.x / 2 + p.x,
-            y: this.ground.y / 2 - p.y
-        }
-    }
-    initArea() {
-        if (this.areas.length > 0) {
-            this.areas.forEach((a) => {
-                this.scene.remove(a);
-            })
-            this.areas.length = 0;
-        }
-        const mapAreaList = [];
-        console.log('addarea', mapAreaList);
-        mapAreaList.forEach((a, index) => {
-            var shape = new THREE.Shape();
-            var drawPoints = this.convertPoints(a.points);
-            var centerpoint = this.convertPoint(a.centerpoint);
-            if (a.type == 'polygon') {
-                if (a.points.length <= 2) {
-                    return;
-                }
-                shape.moveTo(drawPoints[0].x, drawPoints[0].y);
-                for (var i = 1; i < drawPoints.length; i++) {
-                    shape.lineTo(drawPoints[i].x, drawPoints[i].y);
-                }
-                shape.lineTo(drawPoints[0].x, drawPoints[0].y);
-            } else if (a.type == 'circle') {
-                if (a.points.length != 2) {
-                    return;
-                }
-                var shape = new THREE.Shape();
-                var drawPoints = this.convertPoints(a.points);
-                shape.absarc(
-                    drawPoints[0].x,
-                    drawPoints[0].y,
-                    util.getDistance(drawPoints[0], drawPoints[1]),
-                    0,
-                    Math.PI * 2,
-                    true
-                );
-            }
-            var options = {
-                amount: this.state.viewMode == "3D" ? Math.random() * 50 + 10 : 1,
-                //amount: 1,
-                bevelEnabled: false,
-            };
-            var areaMesh = this.createMesh(new THREE.ExtrudeGeometry(shape, options));
-            areaMesh.position.y = this.ground.z;
-            areaMesh.rotation.x = - Math.PI / 2;
-            areaMesh.name = `area_${index}`;
-
-            var linemesh = new THREE.Line(shape.createPointsGeometry(10), new THREE.LineBasicMaterial({
-                color: 0x1585e3,
-                linewidth: 2
-            }));
-            linemesh.position.y = this.ground.z + options.amount;
-            linemesh.rotation.x = - Math.PI / 2;
-
-            var textmesh = this.createSpriteText("一监区");
-            textmesh.position.x = centerpoint.x;
-            textmesh.position.y = this.ground.z + options.amount + 40;
-            textmesh.position.z = - centerpoint.y;
-            //textmesh.position.z = 98;
-            console.log(textmesh);
-            this.scene.add(linemesh);
-            this.scene.add(areaMesh);
-            this.scene.add(textmesh);
-            this.areas.push(linemesh);
-            this.areas.push(areaMesh);
-            this.areas.push(textmesh);
-
-        })
-        // mapAreaList.forEach((mapArea) => {
-        //     mapArea.draw(ctx);
-        // })
-
-
-        // var area = new THREE.Mesh(new THREE.CubeGeometry(150, 30, 100),
-        //     new THREE.MeshLambertMaterial({
-        //         color: 0x7777ff,
-        //         wrapAround: true
-        //     }))
-        //area.setPosition
-        //this.shape.position.set(0, 0, 500);
     }
     createSpriteText(text, color) {
         //先用画布将文字画出
@@ -918,8 +821,8 @@ class MapView extends React.Component {
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
         this.updateLineLight();
-        console.log('camera rotation',this.camera.rotation);
-        console.log('camera position',this.camera.position);
+        // console.log('camera rotation', this.camera.rotation);
+        // console.log('camera position', this.camera.position);
         //this.camera.rotateY(0.001);
         //this.camera.rotation.x += 0.001
         //this.trackballControls.update(delta);
@@ -927,20 +830,14 @@ class MapView extends React.Component {
         this.renderer.render(this.scene, this.camera);
         //console.log(this.camera)
     }
-    updateControls() {
-        this.controls.update();
-    }
-
     render() {
+        const { autoRotate } = this.state;
         return <div ref={(c) => { this.mapContainer = c }} className={styles.mapview}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapView" ></canvas>
             <div ref={(c) => { this.statdom = c }}></div>
             <div className={styles.operateView}>
                 <div onClick={this.onClickAllView}>全景</div>
-            </div>
-            <div className={styles.viewMode}>
-                <div className={this.state.viewMode == "2D" ? styles.checked : ''} onClick={this.onClick2D}>2D</div>
-                <div className={this.state.viewMode == "3D" ? styles.checked : ''} onClick={this.onClick3D}>3D</div>
+                <div className={autoRotate ? styles.checked : ''} onClick={this.onClickAutoRotate}>旋转</div>
             </div>
         </div>
     }
