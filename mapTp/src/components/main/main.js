@@ -7,7 +7,7 @@ class Topo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewMode: '2D'
+      viewMode: '3D'
     }
   }
   onClick2D = () => {

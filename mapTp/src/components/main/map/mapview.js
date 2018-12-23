@@ -1,18 +1,57 @@
 import React from 'react';
 import { connect } from 'dva';
-import styles from './3dview.less'
+import styles from './map.less'
 
 // var step = 0;
 var lineLightstep = 0;
 const lineStep = 300;
+const LEVEL_HEIGHT2 = 0;
 const LEVEL_HEIGHT1 = 700;
 const LEVEL_HEIGHT0 = 1400;
+const LINE_JOIN_HEIGHT0 = 300;
+const LINE_JOIN_HEIGHT1 = 400;
+var WALL_HEIGHT0 = 253;
+var WALL_HEIGHT1 = 253;
+var WALL_HEIGHT2 = 253;
+const GAP0 = 200;
+const GAP1 = 250;
+const GAP2 = 400;
+const OUT_X = 128;
+const OUT_Y = 128;
+const OUT_Z = 128;
+const INNER_X = 50;
+const INNER_Y = 103;
+const INNER_Z = 103;
+
+const PLANE0_BOTTOM_COLOR = 0x2d4293;
+const PLANE0_BOTTOM_OPACITY = 0.5;
+const PLANE0_BORDER_COLOR = 0x3da0e5;
+const PLANE0_BORDER_OPACITY = 0.5;
+const EACHPLANEGAP = 20;
+
+const PLANE1_BOTTOM_COLOR = 0x403689;
+const PLANE1_BOTTOM_OPACITY = 0.15;
+const PLANE1_BORDER_COLOR = 0x7279ff;
+const PLANE1_BORDER_OPACITY = 0.6;
 
 
-var OUT_X = 128;
-var OUT_Y = 128;
-var OUT_Z = 128;
-
+const PLAT_OUT_RIGHT_COLOR_NORMAL = 0x4babef;
+const PLAT_OUT_RIGHT_OPACITY_NORMAL = 0.5;
+const PLAT_OUT_LEFT_COLOR_NORMAL = 0x4babef;
+const PLAT_OUT_LEFT_OPACITY_NORMAL = 0.5;
+const PLAT_OUT_TOP_COLOR_NORMAL = 0x4babef;
+const PLAT_OUT_TOP_OPACITY_NORMAL = 0.5;
+const PLAT_OUT_BOTTOM_COLOR_NORMAL = 0x3f98c3;
+const PLAT_OUT_BACK_COLOR_NORMAL = 0x4babef;
+const PLAT_OUT_BACK_OPACITY_NORMAL = 0.5;
+const PLAT_INNER_RIGHT_COLOR_NORMAL = 0x76cef3;
+const PLAT_INNER_LEFT_COLOR_NORMAL = 0x76cef3;
+const PLAT_INNER_TOP_COLOR_NORMAL = 0xa6feff;
+const PLAT_INNER_BOTTOM_COLOR_NORMAL = 0xa6feff;
+const PLAT_INNER_BACK_COLOR_NORMAL = 0x9aecf8;
+const PLAT_BORDER_COLOR_NORMAL = 0x47c6ea;
+const PLAT_BORDER_COLOR_SELECT = 0xFFD700;
+const PLAT_TEXT_COLOR_NORMAL = '#1E90FF';
 var domainlist = [
     { id: 1, name: '河南监管总队', level: 0 },
     { id: 2, name: '安阳支队1', level: 1, parentId: 1 },
@@ -53,43 +92,43 @@ var domainlist = [
     { id: 37, name: '安阳所1', level: 2, parentId: 10 },
     { id: 38, name: '安阳所1', level: 2, parentId: 11 },
     { id: 39, name: '安阳所1', level: 2, parentId: 12 },
-    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 20, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 21, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 22, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 23, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 24, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 25, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 26, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 27, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 28, name: '安阳所1', level: 2, parentId: 2 },
-    { id: 29, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 40, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 41, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 42, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 43, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 44, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 45, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 46, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 47, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 48, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 49, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 50, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 51, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 52, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 53, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 54, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 55, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 56, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 57, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 58, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 59, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 60, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 61, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 62, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 63, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 64, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 65, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 66, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 67, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 68, name: '安阳所1', level: 2, parentId: 2 },
+    { id: 69, name: '安阳所1', level: 2, parentId: 2 },
 ]
 
 class MapView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            autoRotate: true
+            autoRotate: false
         }
         this.mapContainer = null;
         this.mapCanvas = null;
@@ -97,8 +136,8 @@ class MapView extends React.Component {
         this.plat0 = [];
         this.plat1 = [];
         this.plat2 = [];
+        this.platGroup = {};
         this.lightAnimateObj = [];
-        this.planeWall = [];
         this.curPlatId = 1;
         this.clock = new THREE.Clock();
         this.onMouseClick = this.onMouseClick.bind(this);
@@ -106,10 +145,6 @@ class MapView extends React.Component {
     componentDidMount() {
         this.mapCanvas.width = this.mapContainer.offsetWidth;
         this.mapCanvas.height = this.mapContainer.offsetHeight;
-
-        this.platTexture = new THREE.TextureLoader().load('assets/plat.png');
-        this.wallTexture = new THREE.TextureLoader().load('assets/wall.png');
-        this.wallTexture.wrapS = THREE.RepeatWrapping;
 
         this.initStats();
         this.initThree();
@@ -137,6 +172,7 @@ class MapView extends React.Component {
         if (this.requestID) {
             window.cancelAnimationFrame(this.requestID);
         }
+        this.renderer.dispose();
     }
     onClickAllView = (e) => {
         this.curPlatId = 1;
@@ -153,17 +189,17 @@ class MapView extends React.Component {
     selectPlat(platObj) {
         var platname = platObj.object.name;
         var platId = platname.split('plat')[1];
-        if(this.curPlatId == platId){
+        if (this.curPlatId == platId) {
             return;
         }
         this.curPlatId = platId;
         this.resetTopo();
-        var platall = this.plat0.concat(this.plat1).concat(this.plat2);
-        for (var i = 0; i < platall.length; i++) {
-            if (platall[i].name == platname) {
-                var position = platall[i].position;
-            }
-        }
+        // var platall = this.plat0.concat(this.plat1).concat(this.plat2);
+        // for (var i = 0; i < platall.length; i++) {
+        //     if (platall[i].name == platname) {
+        //         var position = platall[i].position;
+        //     }
+        // }
     }
     onMouseClick = (event) => {
         if (this.isdrag()) {
@@ -218,7 +254,7 @@ class MapView extends React.Component {
         this.scene = new THREE.Scene();
 
         this.initCamera();
-        this.resetTopo();
+        this.initTopo();
 
         var axesHelper = new THREE.AxesHelper(50);
         this.scene.add(axesHelper);
@@ -234,336 +270,281 @@ class MapView extends React.Component {
         this.scene.add(this.camera);
 
         this.orbitControls = new THREE.OrbitControls(this.camera);
-        this.orbitControls.autoRotate = true;
+        this.orbitControls.autoRotate = this.state.autoRotate;
         this.orbitControls.enablePan = false;
         this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT }
         this.orbitControls.maxPolarAngle = Math.PI / 2;
         this.orbitControls.target = new THREE.Vector3(0, 500, 0);
         this.orbitControls.saveState();
     }
-    getRowColumn(nCount) {
-        var rowMax = 10;
-        var columnMax = 10;
-        var ROW_COUNT = 1;
-        var COLUMN_COUNT = 1;
-        while (ROW_COUNT <= rowMax && COLUMN_COUNT <= columnMax) {
-            if (ROW_COUNT * COLUMN_COUNT >= nCount) {
-                break;
+    // 初始化拓扑图
+    initTopo() {
+        this.platTexture = new THREE.TextureLoader().load('assets/plat.png');
+        this.wallTexture = new THREE.TextureLoader().load('assets/wall.png');
+        this.wallTexture.wrapS = THREE.RepeatWrapping;
+        this.lightGeometry = new THREE.SphereBufferGeometry(6, 32, 32);
+        this.lightMaterail = new THREE.MeshBasicMaterial({ color: 0xB9F7FD });
+
+        // 初始化每层的底和墙
+        var initPanel = () => {
+            var geometry = new THREE.PlaneGeometry(1, 1);
+            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
+            var createPanel0 = () => {
+                var group = new THREE.Group();
+                var material = new THREE.MeshBasicMaterial({
+                    color: PLANE0_BOTTOM_COLOR,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: PLANE0_BOTTOM_OPACITY
+                });
+                var plane1 = new THREE.Mesh(geometry, material);
+                var plane2 = new THREE.Mesh(geometry, material);
+                var plane3 = new THREE.Mesh(geometry, material);
+                let edgesMtl = new THREE.LineBasicMaterial({
+                    color: PLANE0_BORDER_COLOR,
+                    transparent: true,
+                    opacity: PLANE0_BORDER_OPACITY
+                });
+                let cubeLine1 = new THREE.LineSegments(cubeEdges, edgesMtl);
+                let cubeLine2 = new THREE.LineSegments(cubeEdges, edgesMtl);
+                let cubeLine3 = new THREE.LineSegments(cubeEdges, edgesMtl);
+                plane1.add(cubeLine1);
+                plane2.add(cubeLine2);
+                plane3.add(cubeLine3);
+                plane1.rotation.x = - Math.PI / 2;
+                plane1.position.y += - 2;
+                plane2.rotation.x = - Math.PI / 2;
+                plane2.position.y += - 2 - EACHPLANEGAP;
+                plane3.rotation.x = - Math.PI / 2;
+                plane3.position.y += - 2 - EACHPLANEGAP * 2;
+
+                group.add(plane1);
+                group.add(plane2);
+                group.add(plane3);
+                group.position.y += LEVEL_HEIGHT0;
+                group.name = 'PLANE0_BOTTOM';
+                this.scene.add(group);
+
             }
-            if (COLUMN_COUNT < ROW_COUNT) {
-                COLUMN_COUNT++;
+            var createPanel12 = (index) => {
+                var material = new THREE.MeshBasicMaterial({
+                    color: PLANE1_BOTTOM_COLOR,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: PLANE1_BOTTOM_OPACITY
+                });
+                var plane = new THREE.Mesh(geometry, material);
+                let edgesMtl = new THREE.LineBasicMaterial({
+                    color: PLANE1_BORDER_COLOR,
+                    transparent: true,
+                    opacity: PLANE1_BORDER_OPACITY
+                });
+                let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+                plane.add(cubeLine);
+                plane.rotation.x = - Math.PI / 2;
+                plane.position.y += (index == 1 ? LEVEL_HEIGHT1 : LEVEL_HEIGHT2) - 2;
+
+                var material_wall = new THREE.MeshBasicMaterial({
+                    map: this.wallTexture,
+                    side: THREE.BackSide,
+                    transparent: true,
+                });
+                var plane_wall1 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall2 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall3 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall4 = new THREE.Mesh(geometry, material_wall);
+                var positionY = (index == 1 ? WALL_HEIGHT1 : WALL_HEIGHT2) / 2 - 2 + (index == 1 ? LEVEL_HEIGHT1 : LEVEL_HEIGHT2);
+                var scaleY = index == 1 ? WALL_HEIGHT1 : WALL_HEIGHT2;
+                plane_wall1.position.y += positionY;
+                plane_wall1.scale.y = scaleY;
+                //plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
+
+                plane_wall2.rotation.y = Math.PI / 2;
+                plane_wall2.position.y += positionY;
+                plane_wall2.scale.y = scaleY;
+                //plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
+
+                plane_wall3.rotation.y = Math.PI;
+                plane_wall3.position.y += positionY;
+                plane_wall3.scale.y = scaleY;
+                //plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
+
+                plane_wall4.rotation.y = - Math.PI / 2;
+                plane_wall4.position.y += positionY;
+                plane_wall4.scale.y = scaleY;
+                //plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
+
+                plane.name = index == 1 ? 'PLANE1_BOTTOM' : 'PLANE2_BOTTOM';
+                plane_wall1.name = index == 1 ? 'PLANE1_WALL_F' : 'PLANE2_WALL_F';
+                plane_wall2.name = index == 1 ? 'PLANE1_WALL_R' : 'PLANE2_WALL_R';
+                plane_wall3.name = index == 1 ? 'PLANE1_WALL_B' : 'PLANE2_WALL_B';
+                plane_wall4.name = index == 1 ? 'PLANE1_WALL_L' : 'PLANE2_WALL_L';
+
+                this.scene.add(plane);
+                this.scene.add(plane_wall1);
+                this.scene.add(plane_wall2);
+                this.scene.add(plane_wall3);
+                this.scene.add(plane_wall4);
+            }
+            createPanel0();
+            createPanel12(1);
+            createPanel12(2);
+        }
+        initPanel();
+        this.resetTopo();
+    }
+    resetTopo() {
+        this.domainlist0 = [];
+        this.domainlist1 = [];
+        this.domainlist2 = [];
+        var curPlat = domainlist.find(d => d.id == this.curPlatId);
+        var curLevel = curPlat.level;
+        if (curLevel == 0) {
+            this.domainlist0 = domainlist.filter(d => d.level == 0);
+            this.domainlist1 = domainlist.filter(d => d.level == 1);
+            if (this.domainlist1.length == 0) {
+                this.domainlist2 = domainlist.filter(d => d.parentId == this.curPlatId);
             } else {
-                ROW_COUNT++;
+                this.domainlist2 = this.domainlist1;
             }
+        } else if (curLevel == 1) {
+            this.domainlist0 = domainlist.filter(d => d.level == 0);
+            this.domainlist1 = domainlist.filter(d => d.id == this.curPlatId);
+            this.domainlist2 = domainlist.filter(d => d.level == 2 && d.parentId == this.curPlatId);
+        } else if (curLevel == 2) {
+            this.domainlist0 = domainlist.filter(d => d.level == 0);
+            this.domainlist1 = domainlist.filter(d => d.id == curPlat.parentId);
+            this.domainlist2 = domainlist.filter(d => d.id == this.curPlatId);
         }
-        return { ROW_COUNT, COLUMN_COUNT };
+        this.resetPlatTopo();
+        this.resetLine();
     }
-    resetPlatLevel0() {
-        this.plat0.forEach((a) => {
-            this.scene.remove(a);
-        })
+    resetPlatTopo() {
+        var getRowColumn = (nCount) => {
+            var rowMax = 10;
+            var columnMax = 10;
+            var ROW_COUNT = 1;
+            var COLUMN_COUNT = 1;
+            while (ROW_COUNT <= rowMax && COLUMN_COUNT <= columnMax) {
+                if (ROW_COUNT * COLUMN_COUNT >= nCount) {
+                    break;
+                }
+                if (COLUMN_COUNT < ROW_COUNT) {
+                    COLUMN_COUNT++;
+                } else {
+                    ROW_COUNT++;
+                }
+            }
+            return { ROW_COUNT, COLUMN_COUNT };
+        }
+        var resetPlat = (nGap, positionY, domainlist, level) => {
+            var nCount = domainlist.length;
+            var scale = nCount == 1 ? 2 : 1;
+            var { COLUMN_COUNT, ROW_COUNT } = getRowColumn(nCount);
+            for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
+                for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
+                    var nIndex = nRow * COLUMN_COUNT + nColumn;
+                    if (nIndex >= nCount) {
+                        break;
+                    }
+                    // 平台方块
+                    var domain = domainlist[nIndex];
+                    let platObj = this.getPlat(domain.id, domain.name, level);
+                    console.log('reset plat scale', platObj.name, platObj.scale.x, scale);
+                    new TWEEN.Tween({ scale: platObj.scale.x }).to({ scale: scale }, 300)
+                        .onUpdate(function () {
+                            platObj.scale.set(this.scale,this.scale,this.scale)
+                        })
+                        .start();
+
+                    //platObj.scale.set(scale, scale, scale);
+                    platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
+                    platObj.position.y = positionY + OUT_Y * scale / 2;
+                    platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
+                    this[`plat${level}`].push(platObj);
+                }
+            }
+
+            var panelWidth = COLUMN_COUNT * OUT_X * scale + nGap * (COLUMN_COUNT - 1) + nGap;
+            var panelHeight = ROW_COUNT * OUT_Y * scale + nGap * (ROW_COUNT - 1) + nGap;
+
+            // 底
+            var panel = this.scene.getObjectByName(`PLANE${level}_BOTTOM`);
+            if (level == 0) {
+                panel.scale.set(panelWidth, 1, panelHeight);
+            } else {
+                panel.scale.set(panelWidth, panelHeight, 1);
+            }
+
+            // 墙
+            var wall_f = this.scene.getObjectByName(`PLANE${level}_WALL_F`);
+            var wall_b = this.scene.getObjectByName(`PLANE${level}_WALL_B`);
+            var wall_r = this.scene.getObjectByName(`PLANE${level}_WALL_R`);
+            var wall_l = this.scene.getObjectByName(`PLANE${level}_WALL_L`);
+            if (!!wall_f) {
+                wall_f.scale.x = panelWidth;
+                wall_f.position.z = panelHeight / 2;
+            }
+            if (!!wall_b) {
+                wall_b.scale.x = panelWidth;
+                wall_b.position.z = - panelHeight / 2;
+            }
+            if (!!wall_r) {
+                wall_r.scale.x = panelHeight;
+                wall_r.position.x = panelWidth / 2;
+            }
+            if (!!wall_l) {
+                wall_l.scale.x = panelHeight;
+                wall_l.position.x = -panelWidth / 2;
+            }
+
+        }
         this.plat0 = [];
-        var scale = 2;
-        var nGap = 200;
-        var platObj = this.createPlat(1, scale, "河南监管总队", "#fff");
-        platObj.position.x = 0;
-        platObj.position.y += LEVEL_HEIGHT0;
-        platObj.position.z = 0;
-        this.scene.add(platObj);
-        this.plat0.push(platObj);
-
-        var createWall = () => {
-            var geometry = new THREE.PlaneGeometry(
-                OUT_X * scale + nGap,
-                OUT_Y * scale + nGap
-            );
-            var material = new THREE.MeshBasicMaterial({
-                color: 0x2d4293,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.5
-            });
-            var plane1 = new THREE.Mesh(geometry, material);
-            var plane2 = new THREE.Mesh(geometry, material);
-            var plane3 = new THREE.Mesh(geometry, material);
-            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x3da0e5, transparent: true, opacity: 0.5 });
-            let cubeLine1 = new THREE.LineSegments(cubeEdges, edgesMtl);
-            let cubeLine2 = new THREE.LineSegments(cubeEdges, edgesMtl);
-            let cubeLine3 = new THREE.LineSegments(cubeEdges, edgesMtl);
-            plane1.add(cubeLine1);
-            plane2.add(cubeLine2);
-            plane3.add(cubeLine3);
-            plane1.rotation.x = - Math.PI / 2;
-            plane1.position.y += LEVEL_HEIGHT0 - 2;
-            plane2.rotation.x = - Math.PI / 2;
-            plane2.position.y += LEVEL_HEIGHT0 - 2 - 10;
-            plane3.rotation.x = - Math.PI / 2;
-            plane3.position.y += LEVEL_HEIGHT0 - 2 - 20;
-
-            // var geometry1 = new THREE.PlaneGeometry(
-            //     COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100,
-            //     WALL_HEIGHT
-            // );
-            // var geometry2 = new THREE.PlaneGeometry(
-            //     ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100,
-            //     WALL_HEIGHT
-            // );
-            // var texture = new THREE.TextureLoader().load('assets/wall.png');
-            // texture.wrapS = THREE.RepeatWrapping;
-            // var material_wall = new THREE.MeshBasicMaterial({
-            //     map: texture,
-            //     side: THREE.BackSide,
-            //     transparent: true,
-            // });
-            // var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
-            // var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
-            // var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
-            // var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
-            // plane_wall1.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            // plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
-
-            // plane_wall2.rotation.y = Math.PI / 2;
-            // plane_wall2.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            // plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
-
-            // plane_wall3.rotation.y = Math.PI;
-            // plane_wall3.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            // plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + 100) / 2;
-
-            // plane_wall4.rotation.y = - Math.PI / 2;
-            // plane_wall4.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT;
-            // plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + 100) / 2;
-
-            this.scene.add(plane1);
-            this.scene.add(plane2);
-            this.scene.add(plane3);
-            this.planeWall.push(plane1)
-            this.planeWall.push(plane2)
-            this.planeWall.push(plane3)
-            // this.scene.add(plane_wall1);
-            // this.scene.add(plane_wall2);
-            // this.scene.add(plane_wall3);
-            // this.scene.add(plane_wall4);
-        }
-        createWall();
-    }
-    resetPlatLevel1() {
-        this.plat1.forEach((a) => {
-            this.scene.remove(a);
-        })
         this.plat1 = [];
-        var nGap = 250;
-        var ROW_COUNT = 1;
-        var COLUMN_COUNT = 1;
-        var WALL_HEIGHT = 253;
-        var scale = 1.2;
-        var { ROW_COUNT, COLUMN_COUNT } = this.getRowColumn(this.domainlist1.length);
-
-        for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
-            for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
-                var nIndex = nRow * COLUMN_COUNT + nColumn;
-                if (nIndex >= this.domainlist1.length) {
-                    break;
-                }
-                // 平台方块
-                var platObj = this.createPlat(this.domainlist1[nIndex].id, scale, "安阳支队", "#FFF");
-                platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
-                platObj.position.y += LEVEL_HEIGHT1;
-                platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
-                this.scene.add(platObj);
-                this.plat1.push(platObj);
-            }
-        }
-
-        var createWall = () => {
-            var geometry = new THREE.PlaneGeometry(
-                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap,
-                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap
-            );
-            var material = new THREE.MeshBasicMaterial({
-                color: 0x403689,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.15
-            });
-            var plane = new THREE.Mesh(geometry, material);
-            plane.rotation.x = - Math.PI / 2;
-            plane.position.y += LEVEL_HEIGHT1 - 2;
-
-            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x7279ff, transparent: true, opacity: 0.6 });
-            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
-            plane.add(cubeLine);
-
-            var geometry1 = new THREE.PlaneGeometry(
-                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap,
-                WALL_HEIGHT
-            );
-            var geometry2 = new THREE.PlaneGeometry(
-                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap,
-                WALL_HEIGHT
-            );
-            //var texture = new THREE.TextureLoader().load('assets/wall.png');
-            //texture.wrapS = THREE.RepeatWrapping;
-            var material_wall = new THREE.MeshBasicMaterial({
-                map: this.wallTexture,
-                side: THREE.BackSide,
-                transparent: true,
-            });
-            var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
-            var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
-            var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
-            var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
-            plane_wall1.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT1;
-            plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
-
-            plane_wall2.rotation.y = Math.PI / 2;
-            plane_wall2.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT1;
-            plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
-
-            plane_wall3.rotation.y = Math.PI;
-            plane_wall3.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT1;
-            plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
-
-            plane_wall4.rotation.y = - Math.PI / 2;
-            plane_wall4.position.y += WALL_HEIGHT / 2 - 2 + LEVEL_HEIGHT1;
-            plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
-
-            this.scene.add(plane);
-            this.scene.add(plane_wall1);
-            this.scene.add(plane_wall2);
-            this.scene.add(plane_wall3);
-            this.scene.add(plane_wall4);
-            this.planeWall.push(plane);
-            this.planeWall.push(plane_wall1);
-            this.planeWall.push(plane_wall2);
-            this.planeWall.push(plane_wall3);
-            this.planeWall.push(plane_wall4);
-        }
-        createWall();
-    }
-    resetPlatLevel2() {
-        this.plat2.forEach((a) => {
-            this.scene.remove(a);
-        })
         this.plat2 = [];
-        var nGap = 400;
-        var WALL_HEIGHT = 253;
-        var scale = 1;
-
-        if (this.curLevel == 0) {
-
-        }
-        var { ROW_COUNT, COLUMN_COUNT } = this.getRowColumn(this.domainlist2.length);
-
-        for (var nRow = 0; nRow < ROW_COUNT; nRow++) {
-            for (var nColumn = 0; nColumn < COLUMN_COUNT; nColumn++) {
-                var nIndex = nRow * COLUMN_COUNT + nColumn;
-                if (nIndex >= this.domainlist2.length) {
-                    break;
-                }
-                // 平台方块
-                var platObj = this.createPlat(this.domainlist2[nIndex].id, scale, "安阳市看守所", "#FFF");
-                platObj.position.x = - (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1)) / 2 + nColumn * (OUT_X + nGap) + OUT_X / 2;
-                platObj.position.y += 0;
-                platObj.position.z = - (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1)) / 2 + nRow * (OUT_Y + nGap) + OUT_Y / 2;
-                this.scene.add(platObj);
-                this.plat2.push(platObj);
+        console.log(this.domainlist2);
+        resetPlat(GAP0, LEVEL_HEIGHT0, this.domainlist0, 0);
+        resetPlat(GAP1, LEVEL_HEIGHT1, this.domainlist1, 1);
+        resetPlat(GAP2, LEVEL_HEIGHT2, this.domainlist2, 2);
+        for (var p in this.platGroup) {
+            if (!this.plat0.find(a => a.name == p) &&
+                !this.plat1.find(a => a.name == p) &&
+                !this.plat2.find(a => a.name == p)) {
+                console.log(p)
+                this.scene.remove(this.platGroup[p]);
             }
         }
 
-        var createWall = () => {
-            var geometry = new THREE.PlaneGeometry(
-                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap,
-                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap
-            );
-            var material = new THREE.MeshBasicMaterial({
-                color: 0x4c2d9a,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.35
-            });
-            var plane = new THREE.Mesh(geometry, material);
-            plane.rotation.x = - Math.PI / 2;
-            plane.position.y += - 2;
-
-            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x986dff, transparent: true, opacity: 0.5 });
-            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
-            plane.add(cubeLine);
-
-            var geometry1 = new THREE.PlaneGeometry(
-                COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap,
-                WALL_HEIGHT
-            );
-            var geometry2 = new THREE.PlaneGeometry(
-                ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap,
-                WALL_HEIGHT
-            );
-            // var texture = new THREE.TextureLoader().load('assets/wall.png');
-            // texture.wrapS = THREE.RepeatWrapping;
-            var material_wall = new THREE.MeshBasicMaterial({
-                map: this.wallTexture,
-                side: THREE.BackSide,
-                transparent: true,
-            });
-            var plane_wall1 = new THREE.Mesh(geometry1, material_wall);
-            var plane_wall2 = new THREE.Mesh(geometry2, material_wall);
-            var plane_wall3 = new THREE.Mesh(geometry1, material_wall);
-            var plane_wall4 = new THREE.Mesh(geometry2, material_wall);
-            plane_wall1.position.y += WALL_HEIGHT / 2 - 2;
-            plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
-
-            plane_wall2.rotation.y = Math.PI / 2;
-            plane_wall2.position.y += WALL_HEIGHT / 2 - 2;
-            plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
-
-            plane_wall3.rotation.y = Math.PI;
-            plane_wall3.position.y += WALL_HEIGHT / 2 - 2;
-            plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
-
-            plane_wall4.rotation.y = - Math.PI / 2;
-            plane_wall4.position.y += WALL_HEIGHT / 2 - 2;
-            plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
-
-            this.scene.add(plane);
-            this.scene.add(plane_wall1);
-            this.scene.add(plane_wall2);
-            this.scene.add(plane_wall3);
-            this.scene.add(plane_wall4);
-
-            this.planeWall.push(plane);
-            this.planeWall.push(plane_wall1);
-            this.planeWall.push(plane_wall2);
-            this.planeWall.push(plane_wall3);
-            this.planeWall.push(plane_wall4);
-        }
-        createWall();
     }
-    createPlat(id, scale, name, textColor) {
+
+    getPlat(id, name, level) {
+        var plat = this.scene.getObjectByName(`${level}plat${id}`);
+        if (!!plat) {
+            console.log('find1!')
+            return plat;
+        }
+        plat = this.platGroup[`${level}plat${id}`];
+        if (!!plat) {
+            this.scene.add(plat);
+            console.log('find2!')
+            return plat;
+        }
+        console.log('no find!')
         var group = new THREE.Group();
-        var INNER_X = 50;
-        var INNER_Y = 103;
-        var INNER_Z = 103;
         var createOutMesh = () => {
             var geometry = new THREE.CubeGeometry(OUT_X, OUT_Y, OUT_Z);
             var mesh = new THREE.Mesh(geometry,
                 [
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: 0x3f98c3, side: THREE.DoubleSide, depthWrite: true }),
+                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_RIGHT_COLOR_NORMAL, opacity: PLAT_OUT_RIGHT_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_LEFT_COLOR_NORMAL, opacity: PLAT_OUT_LEFT_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_TOP_COLOR_NORMAL, opacity: PLAT_OUT_TOP_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_BOTTOM_COLOR_NORMAL, side: THREE.DoubleSide, depthWrite: true }),
                     new THREE.MeshBasicMaterial({ visible: false }),
-                    new THREE.MeshBasicMaterial({ color: 0x4babef, opacity: 0.5, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_BACK_COLOR_NORMAL, opacity: PLAT_OUT_BACK_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
                 ]
             );
             let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            var borderColor = 0x47c6ea;
-            if (id == this.curPlatId) {
-                borderColor = 0xFFD700;
-            }
-            let edgesMtl = new THREE.LineBasicMaterial({ color: borderColor });
+            let edgesMtl = new THREE.LineBasicMaterial({ color: PLAT_BORDER_COLOR_NORMAL });
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
             mesh.add(cubeLine);
 
@@ -573,47 +554,34 @@ class MapView extends React.Component {
             var geometry = new THREE.CubeGeometry(INNER_X, INNER_Y, INNER_Z);
             var mesh = new THREE.Mesh(geometry,
                 [
-                    new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //r
-                    new THREE.MeshBasicMaterial({ color: 0x76cef3 }), //l
-                    new THREE.MeshBasicMaterial({ color: 0xa6feff }), //t
-                    new THREE.MeshBasicMaterial({ color: 0xa6feff }), //b
+                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_RIGHT_COLOR_NORMAL }), //r
+                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_LEFT_COLOR_NORMAL }), //l
+                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_TOP_COLOR_NORMAL }), //t
+                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_BOTTOM_COLOR_NORMAL }), //b
                     new THREE.MeshBasicMaterial({ map: this.platTexture }),    //f
-                    new THREE.MeshBasicMaterial({ color: 0x9aecf8 }), //back
+                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_BACK_COLOR_NORMAL }), //back
                 ]
             );
             return mesh;
         }
-        var createFrameMesh = () => {
-            var geometry = new THREE.CubeGeometry(OUT_X + 30, OUT_Y + 30, OUT_Z + 30);
-            var mesh = new THREE.Mesh(geometry,
-                new THREE.MeshBasicMaterial({ color: 0x000080, opacity: 0.2, transparent: true, side: THREE.DoubleSide, depthWrite: false })
-            );
-            let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: 0x47c6ea });
-            let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
-            mesh.add(cubeLine);
 
-            return mesh;
-        }
         var outMesh = createOutMesh();
-        outMesh.name = 'plat' + id;
+        outMesh.name = `${level}plat${id}`;
         var innerMesh = createInnerMesh();
         innerMesh.position.y -= (OUT_Y - INNER_Y) / 2 - 2;
-        //var frameMesh = createFrameMesh();
-        //group.add(frameMesh);
-        group.add(outMesh);
-        group.add(innerMesh);
 
         // 文字
-        var textmesh = this.createSpriteText(name, textColor);
+        var textmesh = this.createSpriteText(name, PLAT_TEXT_COLOR_NORMAL);
         textmesh.position.x = outMesh.position.x;
         textmesh.position.y = outMesh.position.y + OUT_Y / 2 + 20;
         textmesh.position.z = outMesh.position.z;
-        group.add(textmesh);
 
-        group.position.y += OUT_Y * scale / 2;
-        group.scale.set(scale, scale, scale);
-        group.name = `plat${id}`;
+        group.add(outMesh);
+        group.add(innerMesh);
+        group.add(textmesh);
+        group.name = `${level}plat${id}`;
+        this.scene.add(group);
+        this.platGroup[group.name] = group;
         return group;
     }
     resetLine() {
@@ -622,17 +590,25 @@ class MapView extends React.Component {
             this.scene.remove(linelight);
         })
         this.lightAnimateObj = [];
-
-        var LINE_JOIN_HEIGHT0 = 300;
-        var LINE_JOIN_HEIGHT1 = 400;
         var point = new THREE.Vector3();
+
+
         var createLine = (lineStartPosition, lineEndPosition, lineJoinHeight, lineColor) => {
-            var curve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(lineStartPosition.x, lineStartPosition.y, lineStartPosition.z),
-                new THREE.Vector3(lineStartPosition.x, lineEndPosition.y + lineJoinHeight, lineStartPosition.z),
-                new THREE.Vector3(lineEndPosition.x, lineEndPosition.y + lineJoinHeight, lineEndPosition.z),
-                new THREE.Vector3(lineEndPosition.x, lineEndPosition.y, lineEndPosition.z),
-            ]);
+            var curve;
+            if (lineStartPosition.x == lineEndPosition.x &&
+                lineStartPosition.z == lineEndPosition.z) {
+                curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(lineStartPosition.x, lineStartPosition.y, lineStartPosition.z),
+                    new THREE.Vector3(lineEndPosition.x, lineEndPosition.y, lineEndPosition.z),
+                ]);
+            } else {
+                curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(lineStartPosition.x, lineStartPosition.y, lineStartPosition.z),
+                    new THREE.Vector3(lineStartPosition.x, lineEndPosition.y + lineJoinHeight, lineStartPosition.z),
+                    new THREE.Vector3(lineEndPosition.x, lineEndPosition.y + lineJoinHeight, lineEndPosition.z),
+                    new THREE.Vector3(lineEndPosition.x, lineEndPosition.y, lineEndPosition.z),
+                ]);
+            }
             curve.curveType = 'catmullrom';
             curve.tension = 0;
 
@@ -648,9 +624,8 @@ class MapView extends React.Component {
             var splineObject = new THREE.Line(geometry, material);
             this.scene.add(splineObject);
 
-            var sphere = new THREE.SphereBufferGeometry(6, 32, 32);
-            var texture = new THREE.TextureLoader().load('assets/light.png');
-            var linelight = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0xB9F7FD }))
+            //var texture = new THREE.TextureLoader().load('assets/light.png');
+            var linelight = new THREE.Mesh(this.lightGeometry, this.lightMaterail);
             //var texture = new THREE.TextureLoader().load('assets/light.png');
             //let linelight = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture }));
             //linelight.scale.set(20, 20, 1);
@@ -692,34 +667,8 @@ class MapView extends React.Component {
 
         }
     }
-    resetTopo() {
-        var curPlat = domainlist.find(d => d.id == this.curPlatId);
-        var curLevel = curPlat.level;
-        if (curLevel == 0) {
-            this.domainlist0 = domainlist.filter(d => d.level == 0);
-            this.domainlist1 = domainlist.filter(d => d.level == 1);
-            this.domainlist2 = domainlist.filter(d => d.level == 1 || d.parentId == this.curPlatId);
-        } else if (curLevel == 1) {
-            this.domainlist0 = domainlist.filter(d => d.level == 0);
-            this.domainlist1 = domainlist.filter(d => d.id == this.curPlatId);
-            this.domainlist2 = domainlist.filter(d => d.level == 2 && d.parentId == this.curPlatId);
-        } else if (curLevel == 2) {
-            this.domainlist0 = domainlist.filter(d => d.level == 0);
-            this.domainlist1 = domainlist.filter(d => d.id == curPlat.parentId);
-            this.domainlist2 = domainlist.filter(d => d.id == this.curPlatId);
-        }
-        this.curLevel = curLevel;
 
-        this.planeWall.forEach(p => {
-            this.scene.remove(p);
-        })
-        this.planeWall = [];
 
-        this.resetPlatLevel0();
-        this.resetPlatLevel1();
-        this.resetPlatLevel2();
-        this.resetLine();
-    }
     updateLineLight() {
         for (var i = 0; i < this.lightAnimateObj.length; i++) {
             var { linelight } = this.lightAnimateObj[i];
@@ -798,7 +747,7 @@ class MapView extends React.Component {
         // ctx.fillStyle = "#f00";
         // ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.fillStyle = color;
-        ctx.font = "bold 110px 微软雅黑";
+        ctx.font = "bold 90px 微软雅黑";
         ctx.lineWidth = 4;
         ctx.textAlign = "center"
         ctx.fillText(text, 500, 250);
@@ -823,12 +772,8 @@ class MapView extends React.Component {
         this.updateLineLight();
         // console.log('camera rotation', this.camera.rotation);
         // console.log('camera position', this.camera.position);
-        //this.camera.rotateY(0.001);
-        //this.camera.rotation.x += 0.001
-        //this.trackballControls.update(delta);
         this.requestID = requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
-        //console.log(this.camera)
     }
     render() {
         const { autoRotate } = this.state;
