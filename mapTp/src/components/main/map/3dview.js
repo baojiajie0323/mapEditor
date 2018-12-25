@@ -10,9 +10,11 @@ const LEVEL_HEIGHT1 = 700;
 const LEVEL_HEIGHT0 = 1400;
 const LINE_JOIN_HEIGHT0 = 300;
 const LINE_JOIN_HEIGHT1 = 400;
-var WALL_HEIGHT0 = 253;
-var WALL_HEIGHT1 = 353;
-var WALL_HEIGHT2 = 253;
+const LIST_ROW = 10;
+const LIST_GAP = 20;
+var WALL_HEIGHT0 = 353;
+var WALL_HEIGHT1 = 453;
+var WALL_HEIGHT2 = 553;
 const GAP0 = 200;
 const GAP1 = 250;
 const GAP2 = 400;
@@ -34,6 +36,15 @@ const PLANE1_BOTTOM_OPACITY = 0.15;
 const PLANE1_BORDER_COLOR = 0x7279ff;
 const PLANE1_BORDER_OPACITY = 0.6;
 
+const PLANE2_BOTTOM_COLOR = 0x4c2d9a;
+const PLANE2_BOTTOM_OPACITY = 0.35;
+const PLANE2_BORDER_COLOR = 0x986dff;
+const PLANE2_BORDER_OPACITY = 0.5;
+
+var plat_blue = new THREE.TextureLoader().load('assets/plat_blue.png');
+var plat_gray = new THREE.TextureLoader().load('assets/plat_gray.png');
+var plat_purple = new THREE.TextureLoader().load('assets/plat_purple.png');
+var plat_red = new THREE.TextureLoader().load('assets/plat_red.png');
 
 const PLAT_MATERIAL = {
     Blue: {
@@ -41,68 +52,72 @@ const PLAT_MATERIAL = {
         PLAT_OUT_RIGHT_OPACITY: 0.5,
         PLAT_OUT_LEFT_COLOR: 0x4babef,
         PLAT_OUT_LEFT_OPACITY: 0.5,
-        PLAT_OUT_TOP_COLOR = 0x4babef,
-        PLAT_OUT_TOP_OPACITY = 0.5,
-        PLAT_OUT_BOTTOM_COLOR = 0x3f98c3,
-        PLAT_OUT_BACK_COLOR = 0x4babef,
-        PLAT_OUT_BACK_OPACITY = 0.5,
-        PLAT_INNER_RIGHT_COLOR = 0x76cef3,
-        PLAT_INNER_LEFT_COLOR = 0x76cef3,
-        PLAT_INNER_TOP_COLOR = 0xa6feff,
-        PLAT_INNER_BOTTOM_COLOR = 0xa6feff,
-        PLAT_INNER_BACK_COLOR = 0x9aecf8,
-        PLAT_BORDER_COLOR = 0x47c6ea,
+        PLAT_OUT_TOP_COLOR: 0x4babef,
+        PLAT_OUT_TOP_OPACITY: 0.5,
+        PLAT_OUT_BOTTOM_COLOR: 0x3f98c3,
+        PLAT_OUT_BACK_COLOR: 0x4babef,
+        PLAT_OUT_BACK_OPACITY: 0.5,
+        PLAT_INNER_RIGHT_COLOR: 0x76cef3,
+        PLAT_INNER_LEFT_COLOR: 0x76cef3,
+        PLAT_INNER_TOP_COLOR: 0xa6feff,
+        PLAT_INNER_BOTTOM_COLOR: 0xa6feff,
+        PLAT_INNER_BACK_COLOR: 0x9aecf8,
+        PLAT_INNER_FRONT: plat_blue,
+        PLAT_BORDER_COLOR: 0x47c6ea,
     },
-    Purple:{
-        PLAT_OUT_RIGHT_COLOR: 0x4babef,
+    Purple: {
+        PLAT_OUT_RIGHT_COLOR: 0x7c68ec,
         PLAT_OUT_RIGHT_OPACITY: 0.5,
-        PLAT_OUT_LEFT_COLOR: 0x4babef,
+        PLAT_OUT_LEFT_COLOR: 0x7c68ec,
         PLAT_OUT_LEFT_OPACITY: 0.5,
-        PLAT_OUT_TOP_COLOR = 0x4babef,
-        PLAT_OUT_TOP_OPACITY = 0.5,
-        PLAT_OUT_BOTTOM_COLOR = 0x3f98c3,
-        PLAT_OUT_BACK_COLOR = 0x4babef,
-        PLAT_OUT_BACK_OPACITY = 0.5,
-        PLAT_INNER_RIGHT_COLOR = 0x76cef3,
-        PLAT_INNER_LEFT_COLOR = 0x76cef3,
-        PLAT_INNER_TOP_COLOR = 0xa6feff,
-        PLAT_INNER_BOTTOM_COLOR = 0xa6feff,
-        PLAT_INNER_BACK_COLOR = 0x9aecf8,
-        PLAT_BORDER_COLOR = 0x47c6ea,
+        PLAT_OUT_TOP_COLOR: 0x7c68ec,
+        PLAT_OUT_TOP_OPACITY: 0.5,
+        PLAT_OUT_BOTTOM_COLOR: 0x6b4dc7,
+        PLAT_OUT_BACK_COLOR: 0x7c68ec,
+        PLAT_OUT_BACK_OPACITY: 0.5,
+        PLAT_INNER_RIGHT_COLOR: 0xba92f6,
+        PLAT_INNER_LEFT_COLOR: 0xba92f6,
+        PLAT_INNER_TOP_COLOR: 0xdbc2ff,
+        PLAT_INNER_BOTTOM_COLOR: 0xdbc2ff,
+        PLAT_INNER_BACK_COLOR: 0xd3b5ff,
+        PLAT_INNER_FRONT: plat_purple,
+        PLAT_BORDER_COLOR: 0xa486f3,
     },
-    Red:{
-        PLAT_OUT_RIGHT_COLOR: 0x4babef,
+    Red: {
+        PLAT_OUT_RIGHT_COLOR: 0xc62c30,
         PLAT_OUT_RIGHT_OPACITY: 0.5,
-        PLAT_OUT_LEFT_COLOR: 0x4babef,
+        PLAT_OUT_LEFT_COLOR: 0xc62c30,
         PLAT_OUT_LEFT_OPACITY: 0.5,
-        PLAT_OUT_TOP_COLOR = 0x4babef,
-        PLAT_OUT_TOP_OPACITY = 0.5,
-        PLAT_OUT_BOTTOM_COLOR = 0x3f98c3,
-        PLAT_OUT_BACK_COLOR = 0x4babef,
-        PLAT_OUT_BACK_OPACITY = 0.5,
-        PLAT_INNER_RIGHT_COLOR = 0x76cef3,
-        PLAT_INNER_LEFT_COLOR = 0x76cef3,
-        PLAT_INNER_TOP_COLOR = 0xa6feff,
-        PLAT_INNER_BOTTOM_COLOR = 0xa6feff,
-        PLAT_INNER_BACK_COLOR = 0x9aecf8,
-        PLAT_BORDER_COLOR = 0x47c6ea,
+        PLAT_OUT_TOP_COLOR: 0xc62c30,
+        PLAT_OUT_TOP_OPACITY: 0.5,
+        PLAT_OUT_BOTTOM_COLOR: 0xab3246,
+        PLAT_OUT_BACK_COLOR: 0xc62c30,
+        PLAT_OUT_BACK_OPACITY: 0.5,
+        PLAT_INNER_RIGHT_COLOR: 0xe9929c,
+        PLAT_INNER_LEFT_COLOR: 0xe9929c,
+        PLAT_INNER_TOP_COLOR: 0xf0d3d5,
+        PLAT_INNER_BOTTOM_COLOR: 0xf0d3d5,
+        PLAT_INNER_BACK_COLOR: 0xeeb9bf,
+        PLAT_INNER_FRONT: plat_red,
+        PLAT_BORDER_COLOR: 0xfb3e54,
     },
-    Gray:{
-        PLAT_OUT_RIGHT_COLOR: 0x4babef,
+    Gray: {
+        PLAT_OUT_RIGHT_COLOR: 0x7b7b7b,
         PLAT_OUT_RIGHT_OPACITY: 0.5,
-        PLAT_OUT_LEFT_COLOR: 0x4babef,
+        PLAT_OUT_LEFT_COLOR: 0x7b7b7b,
         PLAT_OUT_LEFT_OPACITY: 0.5,
-        PLAT_OUT_TOP_COLOR = 0x4babef,
-        PLAT_OUT_TOP_OPACITY = 0.5,
-        PLAT_OUT_BOTTOM_COLOR = 0x3f98c3,
-        PLAT_OUT_BACK_COLOR = 0x4babef,
-        PLAT_OUT_BACK_OPACITY = 0.5,
-        PLAT_INNER_RIGHT_COLOR = 0x76cef3,
-        PLAT_INNER_LEFT_COLOR = 0x76cef3,
-        PLAT_INNER_TOP_COLOR = 0xa6feff,
-        PLAT_INNER_BOTTOM_COLOR = 0xa6feff,
-        PLAT_INNER_BACK_COLOR = 0x9aecf8,
-        PLAT_BORDER_COLOR = 0x47c6ea,
+        PLAT_OUT_TOP_COLOR: 0x7b7b7b,
+        PLAT_OUT_TOP_OPACITY: 0.5,
+        PLAT_OUT_BOTTOM_COLOR: 0x6f6f76,
+        PLAT_OUT_BACK_COLOR: 0x7b7b7b,
+        PLAT_OUT_BACK_OPACITY: 0.5,
+        PLAT_INNER_RIGHT_COLOR: 0xbababa,
+        PLAT_INNER_LEFT_COLOR: 0xbababa,
+        PLAT_INNER_TOP_COLOR: 0xe1dddd,
+        PLAT_INNER_BOTTOM_COLOR: 0xe1dddd,
+        PLAT_INNER_BACK_COLOR: 0xcbcbcb,
+        PLAT_INNER_FRONT: plat_gray,
+        PLAT_BORDER_COLOR: 0xa3a3a3,
     }
 }
 
@@ -184,7 +199,8 @@ class MapView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            autoRotate: false
+            autoRotate: false,
+            showMode: 'list'
         }
         this.mapContainer = null;
         this.mapCanvas = null;
@@ -202,7 +218,7 @@ class MapView extends React.Component {
         this.mapCanvas.width = this.mapContainer.offsetWidth;
         this.mapCanvas.height = this.mapContainer.offsetHeight;
 
-        this.initStats();
+        //this.initStats();
         this.initThree();
         this.animate();
 
@@ -225,10 +241,12 @@ class MapView extends React.Component {
         document.removeEventListener("click", this.onMouseClick, false);
         this.renderer.dispose();
     }
-    onClickAllView = (e) => {
+    onClickShowMode = (e) => {
         this.curPlatId = 1;
-        this.resetTopo();
-        console.log(this.camera);
+        var { showMode } = this.state;
+        this.setState({ showMode: showMode == 'list' ? 'topo' : 'list' }, () => {
+            this.resetTopo();
+        })
     }
     onClickAutoRotate = () => {
         var { autoRotate } = this.state;
@@ -237,10 +255,65 @@ class MapView extends React.Component {
         this.orbitControls.saveState();
         this.setState({ autoRotate: autoRotate })
     }
+    showPanel(bShow) {
+        for (var level = 0; level < 3; level++) {
+            // 底
+            var panel = this.scene.getObjectByName(`PLANE${level}_BOTTOM`);
+            // 墙
+            var wall_f = this.scene.getObjectByName(`PLANE${level}_WALL_F`);
+            var wall_b = this.scene.getObjectByName(`PLANE${level}_WALL_B`);
+            var wall_r = this.scene.getObjectByName(`PLANE${level}_WALL_R`);
+            var wall_l = this.scene.getObjectByName(`PLANE${level}_WALL_L`);
+
+            panel.visible = bShow;
+            wall_f.visible = bShow;
+            wall_b.visible = bShow;
+            wall_r.visible = bShow;
+            wall_l.visible = bShow;
+        }
+    }
     setPlatState(platObj, selected) {
         console.log(platObj);
-        platObj.children[0].children[0].material.color.setHex(
-            selected ? PLAT_BORDER_COLOR_SELECT : PLAT_BORDER_COLOR_NORMAL);
+        var themelist = ['Blue', 'Purple', 'Red', 'Gray']
+        var level = platObj.name.split('plat')[0];
+        var id = platObj.name.split('plat')[1];
+        var theme = 'Blue';
+        if (level == 2) {
+            theme = 'Purple'
+        }
+        var platMaterial = PLAT_MATERIAL[theme];
+        const { PLAT_OUT_RIGHT_COLOR,
+            PLAT_OUT_RIGHT_OPACITY,
+            PLAT_OUT_LEFT_COLOR,
+            PLAT_OUT_LEFT_OPACITY,
+            PLAT_OUT_TOP_COLOR,
+            PLAT_OUT_TOP_OPACITY,
+            PLAT_OUT_BOTTOM_COLOR,
+            PLAT_OUT_BACK_COLOR,
+            PLAT_OUT_BACK_OPACITY,
+            PLAT_INNER_RIGHT_COLOR,
+            PLAT_INNER_LEFT_COLOR,
+            PLAT_INNER_TOP_COLOR,
+            PLAT_INNER_BOTTOM_COLOR,
+            PLAT_INNER_BACK_COLOR,
+            PLAT_INNER_FRONT,
+            PLAT_BORDER_COLOR } = platMaterial;
+        platObj.children[0].material[0].color.setHex(PLAT_OUT_RIGHT_COLOR);
+        platObj.children[0].material[0].opacity = PLAT_OUT_RIGHT_OPACITY;
+        platObj.children[0].material[1].color.setHex(PLAT_OUT_LEFT_COLOR);
+        platObj.children[0].material[1].opacity = PLAT_OUT_LEFT_OPACITY;
+        platObj.children[0].material[2].color.setHex(PLAT_OUT_TOP_COLOR);
+        platObj.children[0].material[2].opacity = PLAT_OUT_TOP_OPACITY;
+        platObj.children[0].material[3].color.setHex(PLAT_OUT_BOTTOM_COLOR);
+        platObj.children[0].material[5].color.setHex(PLAT_OUT_BACK_COLOR);
+        platObj.children[0].material[5].opacity = PLAT_OUT_BACK_OPACITY;
+        platObj.children[0].children[0].material.color.setHex(selected ? PLAT_BORDER_COLOR_SELECT : PLAT_BORDER_COLOR),
+            platObj.children[1].material[0].color.setHex(PLAT_INNER_RIGHT_COLOR);
+        platObj.children[1].material[1].color.setHex(PLAT_INNER_LEFT_COLOR);
+        platObj.children[1].material[2].color.setHex(PLAT_INNER_TOP_COLOR);
+        platObj.children[1].material[3].color.setHex(PLAT_INNER_BOTTOM_COLOR);
+        platObj.children[1].material[4].map = PLAT_INNER_FRONT;
+        platObj.children[1].material[5].color.setHex(PLAT_INNER_BACK_COLOR);
     }
     selectPlat(platObj) {
         var platname = platObj.object.name;
@@ -318,8 +391,8 @@ class MapView extends React.Component {
         this.initCamera();
         this.initTopo();
 
-        var axesHelper = new THREE.AxesHelper(50);
-        this.scene.add(axesHelper);
+        //var axesHelper = new THREE.AxesHelper(50);
+        //this.scene.add(axesHelper);
 
 
         this.raycaster = new THREE.Raycaster();
@@ -341,7 +414,6 @@ class MapView extends React.Component {
     }
     // 初始化拓扑图
     initTopo() {
-        this.platTexture = new THREE.TextureLoader().load('assets/plat.png');
         this.wallTexture = new THREE.TextureLoader().load('assets/wall.png');
         this.wallTexture.wrapS = THREE.RepeatWrapping;
         this.lightGeometry = new THREE.SphereBufferGeometry(6, 32, 32);
@@ -380,6 +452,46 @@ class MapView extends React.Component {
                 plane3.rotation.x = - Math.PI / 2;
                 plane3.position.y += - 2 - EACHPLANEGAP * 2;
 
+                var material_wall = new THREE.MeshBasicMaterial({
+                    map: this.wallTexture,
+                    side: THREE.BackSide,
+                    transparent: true,
+                });
+                var plane_wall1 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall2 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall3 = new THREE.Mesh(geometry, material_wall);
+                var plane_wall4 = new THREE.Mesh(geometry, material_wall);
+                var positionY = WALL_HEIGHT0 / 2 - 2 + LEVEL_HEIGHT0;
+                var scaleY = WALL_HEIGHT0;
+                plane_wall1.position.y += positionY;
+                plane_wall1.scale.y = scaleY;
+                //plane_wall1.position.z += (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
+
+                plane_wall2.rotation.y = Math.PI / 2;
+                plane_wall2.position.y += positionY;
+                plane_wall2.scale.y = scaleY;
+                //plane_wall2.position.x += (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
+
+                plane_wall3.rotation.y = Math.PI;
+                plane_wall3.position.y += positionY;
+                plane_wall3.scale.y = scaleY;
+                //plane_wall3.position.z -= (ROW_COUNT * OUT_Y + nGap * (ROW_COUNT - 1) + nGap) / 2;
+
+                plane_wall4.rotation.y = - Math.PI / 2;
+                plane_wall4.position.y += positionY;
+                plane_wall4.scale.y = scaleY;
+                //plane_wall4.position.x -= (COLUMN_COUNT * OUT_X + nGap * (COLUMN_COUNT - 1) + nGap) / 2;
+
+                plane_wall1.name = 'PLANE0_WALL_F';
+                plane_wall2.name = 'PLANE0_WALL_R';
+                plane_wall3.name = 'PLANE0_WALL_B';
+                plane_wall4.name = 'PLANE0_WALL_L';
+
+                this.scene.add(plane_wall1);
+                this.scene.add(plane_wall2);
+                this.scene.add(plane_wall3);
+                this.scene.add(plane_wall4);
+
                 group.add(plane1);
                 group.add(plane2);
                 group.add(plane3);
@@ -390,16 +502,16 @@ class MapView extends React.Component {
             }
             var createPanel12 = (index) => {
                 var material = new THREE.MeshBasicMaterial({
-                    color: PLANE1_BOTTOM_COLOR,
+                    color: index == 1 ? PLANE1_BOTTOM_COLOR : PLANE2_BOTTOM_COLOR,
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: PLANE1_BOTTOM_OPACITY
+                    opacity: index == 1 ? PLANE1_BOTTOM_OPACITY : PLANE2_BOTTOM_OPACITY
                 });
                 var plane = new THREE.Mesh(geometry, material);
                 let edgesMtl = new THREE.LineBasicMaterial({
-                    color: PLANE1_BORDER_COLOR,
+                    color: index == 1 ? PLANE1_BORDER_COLOR : PLANE2_BORDER_COLOR,
                     transparent: true,
-                    opacity: PLANE1_BORDER_OPACITY
+                    opacity: index == 1 ? PLANE1_BORDER_OPACITY : PLANE2_BORDER_OPACITY,
                 });
                 let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
                 plane.add(cubeLine);
@@ -479,16 +591,18 @@ class MapView extends React.Component {
             this.domainlist2 = domainlist.filter(d => d.id == this.curPlatId);
         }
         this.resetPlatTopo();
+        this.showPanel(this.state.showMode == 'topo');
 
         this.lightAnimateObj.forEach(({ splineObject, linelight }) => {
             this.scene.remove(splineObject);
             this.scene.remove(linelight);
         })
         this.lightAnimateObj = [];
-        setTimeout(() => {
-            this.resetLine();
-        }, 500);
-
+        if (this.state.showMode == 'topo') {
+            setTimeout(() => {
+                this.resetLine();
+            }, 500);
+        }
     }
     resetPlatTopo() {
         var getRowColumn = (nCount) => {
@@ -508,7 +622,7 @@ class MapView extends React.Component {
             }
             return { ROW_COUNT, COLUMN_COUNT };
         }
-        var resetPlat = (nGap, positionY, domainlist, level) => {
+        var resetPlat_topo = (nGap, positionY, domainlist, level) => {
             var nCount = domainlist.length;
             var scale = nCount == 1 ? 2 : 1;
             var { COLUMN_COUNT, ROW_COUNT } = getRowColumn(nCount);
@@ -583,13 +697,26 @@ class MapView extends React.Component {
             }
 
         }
+        var resetPlat_list = (domainlistAll) => {
+            var top = LEVEL_HEIGHT0;
+            for (var i = 0; i < domainlistAll.length; i++) {
+                var domain = domainlistAll[i];
+                let platObj = this.getPlat(domain.id, domain.name, domain.level);
+                var nRow = i % LIST_ROW;
+                var positionY = top - (OUT_Y * 2 + LIST_GAP) * nRow;
+                var positionX;
+            }
+        }
         this.plat0 = [];
         this.plat1 = [];
         this.plat2 = [];
-        console.log(this.domainlist2);
-        resetPlat(GAP0, LEVEL_HEIGHT0, this.domainlist0, 0);
-        resetPlat(GAP1, LEVEL_HEIGHT1, this.domainlist1, 1);
-        resetPlat(GAP2, LEVEL_HEIGHT2, this.domainlist2, 2);
+        if (this.state.showMode == 'list') {
+            resetPlat_list(this.domainlist0.concat(this.domainlist1).concat(this.domainlist2));
+        } else {
+            resetPlat_topo(GAP0, LEVEL_HEIGHT0, this.domainlist0, 0);
+            resetPlat_topo(GAP1, LEVEL_HEIGHT1, this.domainlist1, 1);
+            resetPlat_topo(GAP2, LEVEL_HEIGHT2, this.domainlist2, 2);
+        }
         for (var p in this.platGroup) {
             if (!this.plat0.find(a => a.name == p) &&
                 !this.plat1.find(a => a.name == p) &&
@@ -598,7 +725,6 @@ class MapView extends React.Component {
                 this.scene.remove(this.platGroup[p]);
             }
         }
-
     }
 
     getPlat(id, name, level) {
@@ -619,16 +745,16 @@ class MapView extends React.Component {
             var geometry = new THREE.CubeGeometry(OUT_X, OUT_Y, OUT_Z);
             var mesh = new THREE.Mesh(geometry,
                 [
-                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_RIGHT_COLOR_NORMAL, opacity: PLAT_OUT_RIGHT_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_LEFT_COLOR_NORMAL, opacity: PLAT_OUT_LEFT_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_TOP_COLOR_NORMAL, opacity: PLAT_OUT_TOP_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
-                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_BOTTOM_COLOR_NORMAL, side: THREE.DoubleSide, depthWrite: true }),
+                    new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, depthWrite: true }),
                     new THREE.MeshBasicMaterial({ visible: false }),
-                    new THREE.MeshBasicMaterial({ color: PLAT_OUT_BACK_COLOR_NORMAL, opacity: PLAT_OUT_BACK_OPACITY_NORMAL, transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+                    new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false }),
                 ]
             );
             let cubeEdges = new THREE.EdgesGeometry(geometry, 1);
-            let edgesMtl = new THREE.LineBasicMaterial({ color: PLAT_BORDER_COLOR_NORMAL });
+            let edgesMtl = new THREE.LineBasicMaterial();
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
             mesh.add(cubeLine);
 
@@ -638,12 +764,12 @@ class MapView extends React.Component {
             var geometry = new THREE.CubeGeometry(INNER_X, INNER_Y, INNER_Z);
             var mesh = new THREE.Mesh(geometry,
                 [
-                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_RIGHT_COLOR_NORMAL }), //r
-                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_LEFT_COLOR_NORMAL }), //l
-                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_TOP_COLOR_NORMAL }), //t
-                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_BOTTOM_COLOR_NORMAL }), //b
-                    new THREE.MeshBasicMaterial({ map: this.platTexture }),    //f
-                    new THREE.MeshBasicMaterial({ color: PLAT_INNER_BACK_COLOR_NORMAL }), //back
+                    new THREE.MeshBasicMaterial(), //r
+                    new THREE.MeshBasicMaterial(), //l
+                    new THREE.MeshBasicMaterial(), //t
+                    new THREE.MeshBasicMaterial(), //b
+                    new THREE.MeshBasicMaterial(), //f
+                    new THREE.MeshBasicMaterial(), //back
                 ]
             );
             return mesh;
@@ -848,12 +974,12 @@ class MapView extends React.Component {
         this.renderer.render(this.scene, this.camera);
     }
     render() {
-        const { autoRotate } = this.state;
+        const { autoRotate, showMode } = this.state;
         return <div ref={(c) => { this.mapContainer = c }} className={styles.mapview}>
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapView" ></canvas>
             <div ref={(c) => { this.statdom = c }}></div>
             <div className={styles.operateView}>
-                <div onClick={this.onClickAllView}>全景</div>
+                <div onClick={this.onClickShowMode}>{showMode == 'list' ? '列表' : '拓扑'}</div>
                 <div className={autoRotate ? styles.checked : ''} onClick={this.onClickAutoRotate}>旋转</div>
             </div>
         </div>

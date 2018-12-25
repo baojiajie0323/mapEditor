@@ -1,0 +1,47 @@
+.mapview {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: url('../assets/bk.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+
+
+    .operateView{
+        position: absolute;
+        bottom: 100px;
+        left: 20px;
+        width: 45px;
+        height: 68px;
+        border-radius: 3px;
+        overflow: hidden;
+        >div {
+            color: #333;
+            height: 34px;
+            background-color: #fff;
+            border-color: #ccc;
+            line-height: 34px;
+            text-align: center;
+            font-size: 14px;
+            border-width: 1px;
+            border-style: solid;
+            box-sizing: border-box;
+            cursor: pointer;
+            &:hover{
+                background-color: #e6e6e6;
+                border-color: #adadad;
+            }
+        }
+        .checked {
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+            &:hover {
+                background-color: #286090;
+                border-color: #204d74;
+            }
+        }
+    }
+}
