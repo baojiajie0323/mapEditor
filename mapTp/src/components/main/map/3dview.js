@@ -200,7 +200,7 @@ class MapView extends React.Component {
         super(props);
         this.state = {
             autoRotate: true,
-            showMode: 'list'
+            showMode: 'topo'
         }
         this.mapContainer = null;
         this.mapCanvas = null;
@@ -421,7 +421,7 @@ class MapView extends React.Component {
     }
     initCamera() {
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 1, 8000);
-        this.camera.position.set(0, 500, 4000);
+        this.camera.position.set(0, 2860, 3215);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
 
