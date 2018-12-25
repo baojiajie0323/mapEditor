@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import MapView from './map/mapview';
+import MapView from './map/3dview';
 import styles from './main.less';
 
 class Topo extends React.Component {

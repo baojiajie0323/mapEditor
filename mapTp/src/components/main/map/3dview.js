@@ -11,7 +11,7 @@ const LEVEL_HEIGHT0 = 1400;
 const LINE_JOIN_HEIGHT0 = 300;
 const LINE_JOIN_HEIGHT1 = 400;
 const LIST_ROW = 10;
-const LIST_GAP = 20;
+const LIST_GAP = 80;
 var WALL_HEIGHT0 = 353;
 var WALL_HEIGHT1 = 453;
 var WALL_HEIGHT2 = 553;
@@ -199,7 +199,7 @@ class MapView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            autoRotate: false,
+            autoRotate: true,
             showMode: 'list'
         }
         this.mapContainer = null;
@@ -246,6 +246,27 @@ class MapView extends React.Component {
         var { showMode } = this.state;
         this.setState({ showMode: showMode == 'list' ? 'topo' : 'list' }, () => {
             this.resetTopo();
+            var positionx = this.state.showMode == 'list' ? 0 : 0;
+            var positiony = this.state.showMode == 'list' ? 500 : 2860;
+            var positionz = this.state.showMode == 'list' ? 4000 : 3215;
+
+            var camera = this.camera;
+            new TWEEN.Tween({
+                positionx: this.camera.position.x,
+                positiony: this.camera.position.y,
+                positionz: this.camera.position.z
+            }).to({
+                positionx,
+                positiony,
+                positionz
+            }, 300)
+                .onUpdate(function () {
+                    camera.position.set(this.positionx, this.positiony, this.positionz);
+                })
+                .start();
+
+            //this.camera.position.set(0, 2860, 3215);
+            //this.camera.position.set(0, 500, 4000);
         })
     }
     onClickAutoRotate = () => {
@@ -400,7 +421,7 @@ class MapView extends React.Component {
     }
     initCamera() {
         this.camera = new THREE.PerspectiveCamera(45, this.mapCanvas.width / this.mapCanvas.height, 1, 8000);
-        this.camera.position.set(0, 2860, 3215);
+        this.camera.position.set(0, 500, 4000);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera);
 
@@ -410,6 +431,7 @@ class MapView extends React.Component {
         this.orbitControls.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT }
         this.orbitControls.maxPolarAngle = Math.PI / 2;
         this.orbitControls.target = new THREE.Vector3(0, 500, 0);
+        //this.orbitControls.sphericalDelta.phi = 0;
         this.orbitControls.saveState();
     }
     // 初始化拓扑图
@@ -571,25 +593,32 @@ class MapView extends React.Component {
         this.domainlist0 = [];
         this.domainlist1 = [];
         this.domainlist2 = [];
-        var curPlat = domainlist.find(d => d.id == this.curPlatId);
-        var curLevel = curPlat.level;
-        if (curLevel == 0) {
+        if (this.state.showMode == 'list') {
             this.domainlist0 = domainlist.filter(d => d.level == 0);
             this.domainlist1 = domainlist.filter(d => d.level == 1);
-            if (this.domainlist1.length == 0) {
-                this.domainlist2 = domainlist.filter(d => d.parentId == this.curPlatId);
-            } else {
-                this.domainlist2 = this.domainlist1;
+            this.domainlist2 = domainlist.filter(d => d.level == 2);
+        } else {
+            var curPlat = domainlist.find(d => d.id == this.curPlatId);
+            var curLevel = curPlat.level;
+            if (curLevel == 0) {
+                this.domainlist0 = domainlist.filter(d => d.level == 0);
+                this.domainlist1 = domainlist.filter(d => d.level == 1);
+                if (this.domainlist1.length == 0) {
+                    this.domainlist2 = domainlist.filter(d => d.parentId == this.curPlatId);
+                } else {
+                    this.domainlist2 = this.domainlist1;
+                }
+            } else if (curLevel == 1) {
+                this.domainlist0 = domainlist.filter(d => d.level == 0);
+                this.domainlist1 = domainlist.filter(d => d.id == this.curPlatId);
+                this.domainlist2 = domainlist.filter(d => d.level == 2 && d.parentId == this.curPlatId);
+            } else if (curLevel == 2) {
+                this.domainlist0 = domainlist.filter(d => d.level == 0);
+                this.domainlist1 = domainlist.filter(d => d.id == curPlat.parentId);
+                this.domainlist2 = domainlist.filter(d => d.id == this.curPlatId);
             }
-        } else if (curLevel == 1) {
-            this.domainlist0 = domainlist.filter(d => d.level == 0);
-            this.domainlist1 = domainlist.filter(d => d.id == this.curPlatId);
-            this.domainlist2 = domainlist.filter(d => d.level == 2 && d.parentId == this.curPlatId);
-        } else if (curLevel == 2) {
-            this.domainlist0 = domainlist.filter(d => d.level == 0);
-            this.domainlist1 = domainlist.filter(d => d.id == curPlat.parentId);
-            this.domainlist2 = domainlist.filter(d => d.id == this.curPlatId);
         }
+
         this.resetPlatTopo();
         this.showPanel(this.state.showMode == 'topo');
 
@@ -702,9 +731,37 @@ class MapView extends React.Component {
             for (var i = 0; i < domainlistAll.length; i++) {
                 var domain = domainlistAll[i];
                 let platObj = this.getPlat(domain.id, domain.name, domain.level);
-                var nRow = i % LIST_ROW;
+                var nRow = parseInt(i / LIST_ROW);
+                var nColumn = i % LIST_ROW;
                 var positionY = top - (OUT_Y * 2 + LIST_GAP) * nRow;
-                var positionX;
+                var positionX = - (LIST_ROW * OUT_X * 2 + (LIST_ROW - 1) * LIST_GAP) / 2 +
+                    nColumn * (OUT_X * 2 + LIST_GAP) + OUT_X / 2;
+
+                var scale = 1;
+                if (domain.level == 0) {
+                    scale = 2;
+                } else if (domain.level == 1) {
+                    scale = 1.5;
+                }
+                new TWEEN.Tween({
+                    scale: platObj.scale.x,
+                    positionx: platObj.position.x,
+                    positiony: platObj.position.y,
+                    positionz: platObj.position.z
+                }).to({
+                    scale,
+                    positionx: positionX,
+                    positiony: positionY,
+                    positionz: 0
+                }, 300)
+                    .onUpdate(function () {
+                        platObj.scale.set(this.scale, this.scale, this.scale);
+                        platObj.position.set(this.positionx, this.positiony, this.positionz);
+                    })
+                    .start();
+
+                this.setPlatState(platObj, false);
+                this.plat0.push(platObj);
             }
         }
         this.plat0 = [];
@@ -964,7 +1021,7 @@ class MapView extends React.Component {
     }
     animate = () => {
         TWEEN.update();
-        this.stats.update();
+        //this.stats.update();
         var delta = this.clock.getDelta;
         this.orbitControls.update(delta);
         this.updateLineLight();
@@ -979,7 +1036,7 @@ class MapView extends React.Component {
             <canvas ref={(c) => { this.mapCanvas = c }} id="mapView" ></canvas>
             <div ref={(c) => { this.statdom = c }}></div>
             <div className={styles.operateView}>
-                <div onClick={this.onClickShowMode}>{showMode == 'list' ? '列表' : '拓扑'}</div>
+                <div onClick={this.onClickShowMode}>{showMode == 'list' ? '拓扑' : '列表'}</div>
                 <div className={autoRotate ? styles.checked : ''} onClick={this.onClickAutoRotate}>旋转</div>
             </div>
         </div>
